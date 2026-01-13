@@ -69,6 +69,12 @@ type Order = {
   price_usd?: number | null;
   created_at?: string | null;
   artifacts: Artifact[];
+  qc_results?: Array<{
+    id: string;
+    confidence_total: number;
+    hard_fail: boolean;
+    created_at?: string | null;
+  }>;
   intakes?: Intake[];
   job_runs?: Array<{ jobs: Job[]; created_at?: string | null }>;
 };
@@ -151,6 +157,15 @@ export default function DashboardClient() {
       return bTime - aTime;
     });
     return sorted[0]?.jobs ?? [];
+  }, [activeOrder]);
+  const latestQc = useMemo(() => {
+    const results = activeOrder?.qc_results ?? [];
+    const sorted = [...results].sort((a, b) => {
+      const aTime = a.created_at ? Date.parse(a.created_at) : 0;
+      const bTime = b.created_at ? Date.parse(b.created_at) : 0;
+      return bTime - aTime;
+    });
+    return sorted[0];
   }, [activeOrder]);
   const outreach = splitOutreach(intake?.outreach_text ?? "");
   const activeTier = getTier(activeOrder?.tier_id ?? activeOrder?.product_tier ?? "");
@@ -238,6 +253,9 @@ export default function DashboardClient() {
                     {tier?.name ?? order.product_tier ?? "Offer Report"}
                   </p>
                   <p className="text-lg font-semibold">{formatDate(order.created_at)}</p>
+                  {order.price_usd ? (
+                    <p className="text-xs text-slate-500">${order.price_usd} paid</p>
+                  ) : null}
                   <Stepper status={statusMap[order.status]} />
                 </div>
               </Card>
@@ -258,9 +276,22 @@ export default function DashboardClient() {
                       {activeOrder.max_jobs ? `${activeOrder.max_jobs} jobs` : "Tiered"}
                     </p>
                   ) : null}
+                  {activeOrder.price_usd ? (
+                    <p className="text-xs text-slate-500">${activeOrder.price_usd} paid</p>
+                  ) : null}
                 </div>
                 <Stepper status={statusMap[activeOrder.status]} />
               </div>
+              {latestQc ? (
+                <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                  <span className="rounded-full bg-slate-900 px-3 py-1 text-xs uppercase tracking-widest text-white">
+                    QC {Math.round((latestQc.confidence_total ?? 0) * 100)}%
+                  </span>
+                  {latestQc.hard_fail ? (
+                    <span className="text-rose-600">QC flags detected</span>
+                  ) : null}
+                </div>
+              ) : null}
 
               <div className="grid gap-4 md:grid-cols-3">
                 {activeOrder.artifacts.map((artifact) => (
@@ -363,9 +394,9 @@ export default function DashboardClient() {
                 </div>
               </div>
 
-              <div className="overflow-x-auto">
+              <div className="max-h-[420px] overflow-auto">
                 <table className="w-full text-sm">
-                  <thead>
+                  <thead className="sticky top-0 bg-white dark:bg-slate-900">
                     <tr className="border-b border-mist text-left text-xs uppercase tracking-widest text-slate-400">
                       <th className="py-3">Role</th>
                       <th>Scores</th>

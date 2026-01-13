@@ -33,6 +33,7 @@ type AdminOrder = {
   product_tier?: string | null;
   tier_id?: string | null;
   max_jobs?: number | null;
+  price_usd?: number | null;
   artifacts?: Array<{ id: string; kind: string; storage_path: string }>;
   admin_notes?: Array<{ id: string; note: string; created_at: string }>;
   qc_results?: Array<{
@@ -71,7 +72,6 @@ function AdminOrderContent() {
   const [order, setOrder] = useState<AdminOrder | null>(null);
   const [error, setError] = useState("");
   const [note, setNote] = useState("");
-  const [regenSection, setRegenSection] = useState("all");
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
   const forbidden = !authLoading && user && !isAdmin;
 
@@ -207,42 +207,27 @@ function AdminOrderContent() {
     return bTime - aTime;
   })[0];
   const qcFlags = Array.isArray(latestQc?.flags) ? latestQc?.flags : [];
+  const tier = getTier(order.tier_id ?? order.product_tier ?? "");
+  const tierFeatures = tier
+    ? [
+        tier.flags.includeFullResumeRewrite ? "ATS resume rewrite" : null,
+        tier.flags.includeResumePatchNotes ? "Resume patch notes" : null,
+        tier.flags.includeKeywordMap ? "Keyword map" : null,
+        tier.flags.includeOutreachKit ? "Outreach kit" : null,
+        tier.flags.includeCadence ? "Follow-up cadence" : null,
+        tier.flags.includeCertPlan ? "Cert plan + gaps" : null,
+        tier.flags.expandedSourcing ? "Expanded sourcing" : null,
+        tier.flags.priorityTurnaround ? "Priority turnaround" : null,
+        tier.flags.includesSecondRevision ? "Second revision" : null,
+        tier.requiresHumanQA ? "Executive QA included" : null
+      ].filter(Boolean)
+    : [];
 
   return (
     <>
         <PageHeader
           title={`Order ${order.id}`}
-          subtitle={`${order.email} · ${getTier(order.tier_id ?? order.product_tier ?? "")?.name ?? "Tier"}${order.max_jobs ? ` · ${order.max_jobs} jobs` : ""}`}
-          actions={
-            <>
-              <div className="flex items-center gap-2">
-                <select
-                  className="rounded-xl border border-mist px-3 py-2 text-xs dark:border-slate-700 dark:bg-slate-900"
-                  value={regenSection}
-                  onChange={(event) => setRegenSection(event.target.value)}
-                >
-                  <option value="all">Regenerate: all</option>
-                  <option value="jobs">Regenerate: jobs</option>
-                  <option value="resume">Regenerate: resume</option>
-                  <option value="outreach">Regenerate: outreach</option>
-                </select>
-                <Button variant="secondary" onClick={() => runAction("regenerate", regenSection)}>
-                  Run
-                </Button>
-              </div>
-              <Button onClick={() => runAction("approve")} disabled={Boolean(latestQc?.hard_fail)}>
-                Approve &amp; send
-              </Button>
-              {latestQc?.hard_fail ? (
-                <Button variant="secondary" onClick={() => runAction("approve", undefined, true)}>
-                  Override and ship
-                </Button>
-              ) : null}
-              <Button variant="ghost" onClick={() => runAction("regenerate", "all")}>
-                Retry processing
-              </Button>
-            </>
-          }
+          subtitle={`${order.email} · ${tier?.name ?? "Tier"}${order.max_jobs ? ` · ${order.max_jobs} jobs` : ""}`}
         />
 
         <div className="mt-8 grid gap-6 lg:grid-cols-[0.4fr_0.6fr]">
@@ -295,14 +280,6 @@ function AdminOrderContent() {
               ) : (
                 <p className="text-xs text-slate-500">No QC results yet.</p>
               )}
-              <div className="flex flex-wrap gap-2">
-                <Button variant="secondary" onClick={() => runQcAction("rerun")}>
-                  Re-run QC
-                </Button>
-                <Button variant="secondary" onClick={() => runQcAction("repair")}>
-                  Auto-repair and recheck
-                </Button>
-              </div>
             </div>
             <div>
               <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Profile</p>
@@ -330,6 +307,57 @@ function AdminOrderContent() {
           </Card>
 
           <div className="space-y-6">
+            <Card className="space-y-3">
+              <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Quick actions</p>
+              <div className="flex flex-wrap gap-2">
+                <Button variant="secondary" onClick={() => runQcAction("rerun")}>
+                  Re-run QC
+                </Button>
+                <Button variant="secondary" onClick={() => runQcAction("repair")}>
+                  Auto-repair
+                </Button>
+                <Button variant="secondary" onClick={() => runAction("regenerate", "jobs")}>
+                  Regenerate jobs
+                </Button>
+                <Button variant="secondary" onClick={() => runAction("regenerate", "resume")}>
+                  Regenerate resume
+                </Button>
+                <Button onClick={() => runAction("approve")} disabled={Boolean(latestQc?.hard_fail)}>
+                  Approve &amp; deliver
+                </Button>
+                {latestQc?.hard_fail ? (
+                  <Button variant="secondary" onClick={() => runAction("approve", undefined, true)}>
+                    Override &amp; deliver
+                  </Button>
+                ) : null}
+                <Button variant="ghost" onClick={() => runAction("regenerate", "all")}>
+                  Retry processing
+                </Button>
+              </div>
+              {latestQc?.hard_fail ? (
+                <p className="text-xs text-rose-600">
+                  QC hard fail detected. Use override only if you have verified the output.
+                </p>
+              ) : null}
+            </Card>
+
+            {tier ? (
+              <Card className="space-y-3">
+                <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Tier details</p>
+                <div className="space-y-1 text-sm">
+                  <p className="font-semibold text-ink dark:text-white">
+                    {tier.name} {order.price_usd ? `· $${order.price_usd}` : ""}
+                  </p>
+                  <p className="text-xs text-slate-500">Delivery: {tier.delivery}</p>
+                </div>
+                <div className="space-y-1 text-xs text-slate-500">
+                  {tierFeatures.map((feature) => (
+                    <p key={feature}>• {feature}</p>
+                  ))}
+                </div>
+              </Card>
+            ) : null}
+
             <Card className="space-y-4">
               <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Artifacts</p>
               <div className="grid gap-3 md:grid-cols-2">

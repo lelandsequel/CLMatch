@@ -5,6 +5,7 @@ import { Button } from "../../components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
 import { Badge } from "../../components/ui/badge";
 import type { Tier } from "../../lib/pricing";
+import { tierSortOrder } from "../../lib/pricing";
 
 export default function PricingClient({
   quickWins,
@@ -18,6 +19,23 @@ export default function PricingClient({
   stripeReady: boolean;
 }) {
   const [loadingTier, setLoadingTier] = useState<string | null>(null);
+  const allTiers = [...quickWins, ...fullEngine].sort(
+    (a, b) => tierSortOrder.indexOf(a.id) - tierSortOrder.indexOf(b.id)
+  );
+  const comparisonRows = [
+    { label: "Jobs included", value: (tier: Tier) => `${tier.limits.maxJobs}` },
+    { label: "ATS resume rewrite", value: (tier: Tier) => (tier.flags.includeFullResumeRewrite ? "Yes" : "No") },
+    { label: "Resume patch notes", value: (tier: Tier) => (tier.flags.includeResumePatchNotes ? "Yes" : "No") },
+    { label: "Keyword map", value: (tier: Tier) => (tier.flags.includeKeywordMap ? "Yes" : "No") },
+    { label: "Outreach kit", value: (tier: Tier) => (tier.flags.includeOutreachKit ? "Yes" : "No") },
+    { label: "Follow-up cadence", value: (tier: Tier) => (tier.flags.includeCadence ? "Yes" : "No") },
+    { label: "Cert plan + gaps", value: (tier: Tier) => (tier.flags.includeCertPlan ? "Yes" : "No") },
+    { label: "Expanded sourcing", value: (tier: Tier) => (tier.flags.expandedSourcing ? "Yes" : "No") },
+    { label: "Priority turnaround", value: (tier: Tier) => (tier.flags.priorityTurnaround ? "Yes" : "No") },
+    { label: "Second revision", value: (tier: Tier) => (tier.flags.includesSecondRevision ? "Yes" : "No") },
+    { label: "Executive QA", value: (tier: Tier) => (tier.requiresHumanQA ? "Included" : "No") },
+    { label: "Delivery", value: (tier: Tier) => tier.delivery }
+  ];
 
   const startCheckout = async (tierId: string) => {
     setLoadingTier(tierId);
@@ -148,17 +166,32 @@ export default function PricingClient({
           <CardTitle>Feature comparison</CardTitle>
           <CardDescription>Premium positioning, transparent scope.</CardDescription>
         </CardHeader>
-        <div className="grid gap-4 text-sm text-slate-600 dark:text-slate-300 md:grid-cols-2">
-          <div className="space-y-2">
-            <p>• ATS resume rewrite</p>
-            <p>• Job sourcing + anti-ghost scoring</p>
-            <p>• Outreach scripts + cadence</p>
-          </div>
-          <div className="space-y-2">
-            <p>• Seniority-aligned positioning</p>
-            <p>• Cert plan + skill gaps</p>
-            <p>• Human QA + approval flow</p>
-          </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-mist text-left text-xs uppercase tracking-widest text-slate-400">
+                <th className="py-3 pr-6">Feature</th>
+                {allTiers.map((tier) => (
+                  <th key={tier.id} className="py-3 pr-6">
+                    {tier.name}
+                    <span className="block text-slate-400">${tier.priceUSD}</span>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {comparisonRows.map((row) => (
+                <tr key={row.label} className="border-b border-mist/60">
+                  <td className="py-3 pr-6 font-medium text-ink dark:text-white">{row.label}</td>
+                  {allTiers.map((tier) => (
+                    <td key={tier.id} className="py-3 pr-6 text-slate-600 dark:text-slate-300">
+                      {row.value(tier)}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </Card>
 
