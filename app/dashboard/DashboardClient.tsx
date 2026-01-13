@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getMissingPublicEnv } from "../env-check";
 import { EnvMissingPanel } from "../../components/env-missing-panel";
@@ -13,6 +13,7 @@ import { FitBadge, GhostBadge, AtsBadge } from "../../components/badges";
 import { CopyButton } from "../../components/copy-button";
 import { useSession } from "../../components/auth/AuthProvider";
 import { getTier } from "../../lib/pricing";
+import { normalizePivotPathways } from "../../lib/pivotPathways";
 
 const statusMap: Record<string, "Parsing" | "Sourcing" | "Draft" | "Needs Review" | "Approved"> = {
   draft: "Draft",
@@ -37,6 +38,7 @@ type Intake = {
   outreach_text?: string | null;
   gap_suggestions?: string[] | null;
   cert_suggestions?: string[] | null;
+  pivot_pathways_json?: Record<string, unknown> | null;
 };
 
 type Job = {
@@ -149,7 +151,7 @@ export default function DashboardClient() {
 
   const activeOrder = orders.find((order) => order.id === activeOrderId) ?? orders[0];
   const intake = activeOrder?.intakes?.[0];
-  const jobs = useMemo(() => {
+  const jobs = (() => {
     const runs = activeOrder?.job_runs ?? [];
     const sorted = [...runs].sort((a, b) => {
       const aTime = a.created_at ? Date.parse(a.created_at) : 0;
@@ -157,8 +159,8 @@ export default function DashboardClient() {
       return bTime - aTime;
     });
     return sorted[0]?.jobs ?? [];
-  }, [activeOrder]);
-  const latestQc = useMemo(() => {
+  })();
+  const latestQc = (() => {
     const results = activeOrder?.qc_results ?? [];
     const sorted = [...results].sort((a, b) => {
       const aTime = a.created_at ? Date.parse(a.created_at) : 0;
@@ -166,23 +168,23 @@ export default function DashboardClient() {
       return bTime - aTime;
     });
     return sorted[0];
-  }, [activeOrder]);
+  })();
   const outreach = splitOutreach(intake?.outreach_text ?? "");
   const activeTier = getTier(activeOrder?.tier_id ?? activeOrder?.product_tier ?? "");
   const isPremium = Boolean(activeTier?.requiresHumanQA);
+  const pivotPathways = normalizePivotPathways(intake?.pivot_pathways_json);
+  const pivots = pivotPathways?.pivots ?? [];
 
-  const filteredJobs = useMemo(() => {
-    return jobs.filter((job) => {
-      if (job.fit_score < fitMin) return false;
-      if (job.ghost_risk_score > ghostMax) return false;
-      if (atsFilter !== "all" && job.ats_type !== atsFilter) return false;
-      if (search) {
-        const hay = `${job.title} ${job.company_name}`.toLowerCase();
-        if (!hay.includes(search.toLowerCase())) return false;
-      }
-      return true;
-    });
-  }, [jobs, fitMin, ghostMax, atsFilter, search]);
+  const filteredJobs = jobs.filter((job) => {
+    if (job.fit_score < fitMin) return false;
+    if (job.ghost_risk_score > ghostMax) return false;
+    if (atsFilter !== "all" && job.ats_type !== atsFilter) return false;
+    if (search) {
+      const hay = `${job.title} ${job.company_name}`.toLowerCase();
+      if (!hay.includes(search.toLowerCase())) return false;
+    }
+    return true;
+  });
 
   if (missingEnv.length) {
     return <EnvMissingPanel missing={missingEnv} />;
@@ -495,6 +497,67 @@ export default function DashboardClient() {
               </div>
               <Button variant="secondary">Request refresh</Button>
             </Card>
+
+            {pivots.length ? (
+              <Card className="space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <h3 className="text-lg font-semibold">Pivot Pathways™</h3>
+                  <span className="rounded-full bg-ink px-3 py-1 text-xs uppercase tracking-widest text-white">
+                    Pivot Pathways™
+                  </span>
+                </div>
+                <div className="grid gap-4">
+                  {pivots.slice(0, 4).map((pivot, index) => (
+                    <div
+                      key={`${pivot.industry}-${index}`}
+                      className="rounded-xl border border-mist bg-white p-4 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300"
+                    >
+                      <p className="text-xs uppercase tracking-[0.3em] text-slate-400">{pivot.industry}</p>
+                      <p className="mt-2 font-semibold text-ink dark:text-white">
+                        {pivot.role_titles.slice(0, 6).join(" · ")}
+                      </p>
+                      <div className="mt-3 grid gap-4 md:grid-cols-2">
+                        <div>
+                          <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Why you fit</p>
+                          <ul className="mt-2 space-y-1 text-xs">
+                            {pivot.why_you_fit.slice(0, 5).map((item) => (
+                              <li key={item}>• {item}</li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div>
+                          <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Pivot narrative</p>
+                          <ul className="mt-2 space-y-1 text-xs">
+                            {pivot.pivot_narrative_bullets.slice(0, 5).map((item) => (
+                              <li key={item}>• {item}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                      {pivot.recommended_certs.length ? (
+                        <div className="mt-3">
+                          <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Cert stack</p>
+                          <div className="mt-2 flex flex-wrap gap-2 text-xs">
+                            {pivot.recommended_certs.slice(0, 4).map((cert) => (
+                              <a
+                                key={`${cert.name}-${cert.url}`}
+                                href={cert.url}
+                                target="_blank"
+                                rel="noreferrer"
+                                title={cert.why_it_matters}
+                                className="rounded-full border border-mist px-3 py-1 text-slate-600 hover:border-ink hover:text-ink dark:border-slate-700 dark:text-slate-300"
+                              >
+                                {cert.name}
+                              </a>
+                            ))}
+                          </div>
+                        </div>
+                      ) : null}
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            ) : null}
           </div>
         ) : null}
       </div>

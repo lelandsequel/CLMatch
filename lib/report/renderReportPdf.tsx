@@ -1,5 +1,6 @@
 import { Document, Page, Text, View, Link, StyleSheet, Font } from "@react-pdf/renderer";
 import { renderToBuffer } from "@react-pdf/renderer";
+import type { PivotPathways } from "../pivotPathways";
 
 Font.register({
   family: "Times",
@@ -41,11 +42,13 @@ export async function renderReportPdf(payload: {
   includeResume?: boolean;
   patchNotes?: string;
   keywordMap?: string[];
+  pivotPathways?: PivotPathways | null;
 }) {
   const generatedAt = new Date().toLocaleString("en-US", {
     dateStyle: "medium",
     timeStyle: "short"
   });
+  const pivots = payload.pivotPathways?.pivots?.length ? payload.pivotPathways.pivots.slice(0, 4) : [];
   const toc = [
     "Candidate Snapshot",
     payload.includeResume ? "ATS Resume" : null,
@@ -54,6 +57,7 @@ export async function renderReportPdf(payload: {
     payload.keywordMap?.length ? "Keyword Map" : null,
     payload.gaps.length ? "Skill Gaps + Fixes" : null,
     payload.certs.length ? "Certifications" : null,
+    pivots.length ? "Pivot Pathways™" : null,
     "Outreach Pack"
   ].filter(Boolean) as string[];
 
@@ -149,6 +153,51 @@ export async function renderReportPdf(payload: {
             <Text style={styles.subheading}>Certifications</Text>
             {payload.certs.map((cert) => (
               <Text key={cert} style={styles.text}>• {cert}</Text>
+            ))}
+          </>
+        ) : null}
+
+        {pivots.length ? (
+          <>
+            <Text style={styles.subheading}>Pivot Pathways™</Text>
+            {pivots.map((pivot, index) => (
+              <View key={`${pivot.industry}-${index}`} style={{ marginBottom: 10 }}>
+                <Text style={{ fontSize: 12, fontWeight: 700 }}>{pivot.industry}</Text>
+                {pivot.role_titles.length ? (
+                  <Text style={[styles.text, { marginTop: 2 }]}>
+                    Role titles: {pivot.role_titles.slice(0, 6).join(", ")}
+                  </Text>
+                ) : null}
+                {pivot.why_you_fit.length ? (
+                  <>
+                    <Text style={[styles.text, { marginTop: 4, color: "#475569" }]}>Why you fit</Text>
+                    {pivot.why_you_fit.slice(0, 4).map((item) => (
+                      <Text key={item} style={styles.text}>• {item}</Text>
+                    ))}
+                  </>
+                ) : null}
+                {pivot.recommended_certs.length ? (
+                  <>
+                    <Text style={[styles.text, { marginTop: 4, color: "#475569" }]}>Cert stack</Text>
+                    {pivot.recommended_certs.slice(0, 3).map((cert) => (
+                      <Text key={`${cert.name}-${cert.url}`} style={styles.text}>
+                        •{" "}
+                        <Link src={cert.url} style={{ color: "#2563eb" }}>
+                          {cert.name}
+                        </Link>
+                      </Text>
+                    ))}
+                  </>
+                ) : null}
+                {pivot.pivot_narrative_bullets.length ? (
+                  <>
+                    <Text style={[styles.text, { marginTop: 4, color: "#475569" }]}>Pivot narrative</Text>
+                    {pivot.pivot_narrative_bullets.slice(0, 3).map((item) => (
+                      <Text key={item} style={styles.text}>• {item}</Text>
+                    ))}
+                  </>
+                ) : null}
+              </View>
             ))}
           </>
         ) : null}

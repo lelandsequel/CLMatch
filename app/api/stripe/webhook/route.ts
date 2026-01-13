@@ -34,6 +34,7 @@ export async function POST(request: Request) {
       }
       const tierId = session.metadata?.tier_id ?? session.metadata?.product_tier ?? "";
       const tier = getTier(tierId);
+      const includedFeatures = tier ? { ...tier.flags, includesPivotPathways: tier.includesPivotPathways } : null;
       await createOrder({
         email,
         full_name: session.metadata?.full_name ?? null,
@@ -41,7 +42,7 @@ export async function POST(request: Request) {
         stripe_payment_status: session.payment_status,
         tier_id: tier?.id ?? null,
         price_usd: tier?.priceUSD ?? null,
-        included_features: tier?.flags ?? null,
+        included_features: includedFeatures,
         max_jobs: tier?.limits.maxJobs ?? null,
         status: "draft"
       });

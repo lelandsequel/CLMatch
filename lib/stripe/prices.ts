@@ -5,6 +5,7 @@ const PRICE_ENV: Record<TierId, string> = {
   ghost_proof_list: "STRIPE_PRICE_GHOST_PROOF_99",
   interview_boost_kit: "STRIPE_PRICE_INTERVIEW_BOOST_149",
   rapid_offer_lite: "STRIPE_PRICE_RAPID_LITE_199",
+  pivot_pack: "STRIPE_PRICE_PIVOT_PACK",
   offer_farming_report: "STRIPE_PRICE_OFFER_REPORT_399",
   offer_sprint: "STRIPE_PRICE_OFFER_SPRINT_599"
 };

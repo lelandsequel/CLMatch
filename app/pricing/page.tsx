@@ -11,7 +11,7 @@ export default function PricingPage() {
     ["job_radar", "ghost_proof_list", "interview_boost_kit"].includes(tier.id)
   );
   const fullEngine = tiers.filter((tier) =>
-    ["rapid_offer_lite", "offer_farming_report", "offer_sprint"].includes(tier.id)
+    ["rapid_offer_lite", "pivot_pack", "offer_farming_report", "offer_sprint"].includes(tier.id)
   );
   const stripeDisabled = process.env.STRIPE_DISABLED === "true";
   const stripeReady = stripeDisabled

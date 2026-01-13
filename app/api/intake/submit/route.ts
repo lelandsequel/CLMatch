@@ -31,6 +31,7 @@ export async function POST(request: Request) {
     let order = sessionId ? await findOrderBySession(sessionId) : null;
 
     if (!order && devMode) {
+      const includedFeatures = { ...tier.flags, includesPivotPathways: tier.includesPivotPathways };
       order = await createOrder({
         email,
         full_name: fullName,
@@ -38,7 +39,7 @@ export async function POST(request: Request) {
         stripe_payment_status: devMode ? "paid" : null,
         tier_id: tier.id,
         price_usd: tier.priceUSD,
-        included_features: tier.flags,
+        included_features: includedFeatures,
         max_jobs: tier.limits.maxJobs,
         status: "draft"
       });

@@ -111,19 +111,21 @@ export async function updateIntakeOutputs(payload: {
   resume_ats_text?: string | null;
   resume_patch_notes?: string | null;
   keyword_map?: string[] | null;
+  pivot_pathways_json?: Record<string, unknown> | null;
 }) {
   const supabase = getServiceSupabase();
-  const { error } = await supabase
-    .from("intakes")
-    .update({
-      outreach_text: payload.outreach_text,
-      gap_suggestions: payload.gap_suggestions,
-      cert_suggestions: payload.cert_suggestions,
-      resume_ats_text: payload.resume_ats_text ?? null,
-      resume_patch_notes: payload.resume_patch_notes ?? null,
-      keyword_map: payload.keyword_map ?? null
-    })
-    .eq("id", payload.intakeId);
+  const updates: Record<string, unknown> = {
+    outreach_text: payload.outreach_text,
+    gap_suggestions: payload.gap_suggestions,
+    cert_suggestions: payload.cert_suggestions,
+    resume_ats_text: payload.resume_ats_text ?? null,
+    resume_patch_notes: payload.resume_patch_notes ?? null,
+    keyword_map: payload.keyword_map ?? null
+  };
+  if (payload.pivot_pathways_json !== undefined) {
+    updates.pivot_pathways_json = payload.pivot_pathways_json;
+  }
+  const { error } = await supabase.from("intakes").update(updates).eq("id", payload.intakeId);
   if (error) throw error;
 }
 

@@ -3,6 +3,7 @@ export type TierId =
   | "ghost_proof_list"
   | "interview_boost_kit"
   | "rapid_offer_lite"
+  | "pivot_pack"
   | "offer_farming_report"
   | "offer_sprint";
 
@@ -21,6 +22,7 @@ export type TierFlags = {
 export type Tier = {
   id: TierId;
   name: string;
+  badge?: string;
   priceUSD: number;
   tagline: string;
   bullets: string[];
@@ -33,6 +35,7 @@ export type Tier = {
   requiresHumanQA: boolean;
   qcStrictness: "low" | "standard" | "high";
   delivery: string;
+  includesPivotPathways: boolean;
 };
 
 export const tiers: Tier[] = [
@@ -63,7 +66,8 @@ export const tiers: Tier[] = [
     shipsAutomatically: true,
     requiresHumanQA: false,
     qcStrictness: "standard",
-    delivery: "Same day"
+    delivery: "Same day",
+    includesPivotPathways: false
   },
   {
     id: "ghost_proof_list",
@@ -92,7 +96,8 @@ export const tiers: Tier[] = [
     shipsAutomatically: true,
     requiresHumanQA: false,
     qcStrictness: "standard",
-    delivery: "24-48h"
+    delivery: "24-48h",
+    includesPivotPathways: false
   },
   {
     id: "interview_boost_kit",
@@ -121,7 +126,8 @@ export const tiers: Tier[] = [
     shipsAutomatically: true,
     requiresHumanQA: false,
     qcStrictness: "standard",
-    delivery: "48-72h"
+    delivery: "48-72h",
+    includesPivotPathways: false
   },
   {
     id: "rapid_offer_lite",
@@ -150,7 +156,40 @@ export const tiers: Tier[] = [
     shipsAutomatically: false,
     requiresHumanQA: true,
     qcStrictness: "high",
-    delivery: "24-48h"
+    delivery: "24-48h",
+    includesPivotPathways: false
+  },
+  {
+    id: "pivot_pack",
+    name: "Pivot Pack",
+    badge: "Pivot Pathways",
+    priceUSD: 299,
+    tagline: "Core engine plus pivot-ready pathways.",
+    bullets: [
+      "ATS resume rewrite (PDF + DOCX)",
+      "Top 10 urgent roles with Fit + Ghost scoring",
+      "Skill gaps + cert plan",
+      "Outreach scripts + 14-day cadence",
+      "Pivot Pathways™: transferable skills + alternative industries + pivot narrative"
+    ],
+    ctaLabel: "Get Pivot Pack",
+    limits: { maxJobs: 10 },
+    flags: {
+      includeFullResumeRewrite: true,
+      includeResumePatchNotes: false,
+      includeKeywordMap: true,
+      includeOutreachKit: true,
+      includeCadence: true,
+      includeCertPlan: true,
+      expandedSourcing: false,
+      priorityTurnaround: false,
+      includesSecondRevision: false
+    },
+    shipsAutomatically: true,
+    requiresHumanQA: false,
+    qcStrictness: "standard",
+    delivery: "24-48h",
+    includesPivotPathways: true
   },
   {
     id: "offer_farming_report",
@@ -161,7 +200,8 @@ export const tiers: Tier[] = [
       "10 urgent roles with Fit + Ghost scores",
       "Full ATS resume rewrite (PDF + DOCX)",
       "Clickable premium PDF + dashboard access",
-      "Outreach kit + 14-day cadence + cert plan"
+      "Outreach kit + 14-day cadence + cert plan",
+      "Pivot Pathways™ + strategic pivot narrative"
     ],
     ctaLabel: "Run the engine",
     limits: { maxJobs: 10 },
@@ -179,7 +219,8 @@ export const tiers: Tier[] = [
     shipsAutomatically: false,
     requiresHumanQA: true,
     qcStrictness: "high",
-    delivery: "3-5 business days"
+    delivery: "3-5 business days",
+    includesPivotPathways: true
   },
   {
     id: "offer_sprint",
@@ -190,7 +231,8 @@ export const tiers: Tier[] = [
       "12-15 urgent roles (expanded sourcing)",
       "Deep ATS rewrite + keyword map",
       "Priority turnaround + second revision",
-      "Expanded outreach sequences + follow-ups"
+      "Expanded outreach sequences + follow-ups",
+      "Pivot Pathways™ + executive-level positioning"
     ],
     ctaLabel: "Sprint to offers",
     limits: { maxJobs: 15 },
@@ -208,7 +250,8 @@ export const tiers: Tier[] = [
     shipsAutomatically: false,
     requiresHumanQA: true,
     qcStrictness: "high",
-    delivery: "Priority"
+    delivery: "Priority",
+    includesPivotPathways: true
   }
 ];
 

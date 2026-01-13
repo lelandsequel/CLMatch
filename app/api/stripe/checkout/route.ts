@@ -23,6 +23,7 @@ export async function POST(request: Request) {
 
   if (process.env.STRIPE_DISABLED === "true") {
     const devSessionId = `dev_${randomUUID()}`;
+    const includedFeatures = { ...tier.flags, includesPivotPathways: tier.includesPivotPathways };
     await createOrder({
       email: body.email ?? "dev@example.com",
       full_name: body.full_name ?? null,
@@ -30,7 +31,7 @@ export async function POST(request: Request) {
       stripe_payment_status: "paid",
       tier_id: tier.id,
       price_usd: tier.priceUSD,
-      included_features: tier.flags,
+      included_features: includedFeatures,
       max_jobs: tier.limits.maxJobs,
       status: "draft"
     });

@@ -114,7 +114,8 @@ export async function POST(
         outreach: repaired.outreachDraft,
         includeResume: tier.flags.includeFullResumeRewrite,
         patchNotes: tier.flags.includeResumePatchNotes ? repaired.resumeDraft : "",
-        keywordMap: repaired.keywordMap
+        keywordMap: repaired.keywordMap,
+        pivotPathways: intake.pivot_pathways_json ?? null
       });
 
       const reportPath = `reports/${id}/report.pdf`;

@@ -30,6 +30,10 @@ export default function PricingClient({
     { label: "Outreach kit", value: (tier: Tier) => (tier.flags.includeOutreachKit ? "Yes" : "No") },
     { label: "Follow-up cadence", value: (tier: Tier) => (tier.flags.includeCadence ? "Yes" : "No") },
     { label: "Cert plan + gaps", value: (tier: Tier) => (tier.flags.includeCertPlan ? "Yes" : "No") },
+    {
+      label: "Pivot Pathways™ (transferable skills + alternative industries + pivot narrative)",
+      value: (tier: Tier) => (tier.includesPivotPathways ? "✅" : "—")
+    },
     { label: "Expanded sourcing", value: (tier: Tier) => (tier.flags.expandedSourcing ? "Yes" : "No") },
     { label: "Priority turnaround", value: (tier: Tier) => (tier.flags.priorityTurnaround ? "Yes" : "No") },
     { label: "Second revision", value: (tier: Tier) => (tier.flags.includesSecondRevision ? "Yes" : "No") },
@@ -106,16 +110,17 @@ export default function PricingClient({
           <Badge>Full engine</Badge>
           <p className="text-sm text-slate-500">Complete sourcing + ATS assets.</p>
         </div>
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           {fullEngine.map((tier) => {
             const badge =
-              tier.id === "rapid_offer_lite"
+              tier.badge ??
+              (tier.id === "rapid_offer_lite"
                 ? "Most Popular"
                 : tier.id === "offer_farming_report"
                   ? "Best Value"
                   : tier.id === "offer_sprint"
                     ? "White-glove"
-                    : "";
+                    : "");
             return (
               <Card key={tier.id} className="flex h-full flex-col border-ink/10">
                 <CardHeader>

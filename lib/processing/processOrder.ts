@@ -4,6 +4,7 @@ import { generateResumeATS } from "../llm/generateResumeATS";
 import { generateResumePatchNotes } from "../llm/generateResumePatchNotes";
 import { generateOutreach } from "../llm/generateOutreach";
 import { generateCertsAndGaps } from "../llm/generateCertsAndGaps";
+import { generatePivotPathways } from "../llm/generatePivotPathways";
 import { renderReportPdf } from "../report/renderReportPdf";
 import { renderResumePdf } from "../report/renderResumePdf";
 import { renderResumeDocx } from "../report/renderResumeDocx";
@@ -102,6 +103,15 @@ export async function processOrder(payload: {
     ? Array.from(new Set([...profile.keywords, ...profile.skills, ...profile.tools])).slice(0, tier.id === "ghost_proof_list" ? 5 : 12)
     : [];
 
+  const pivotPathways = tier.includesPivotPathways
+    ? await generatePivotPathways({
+        resumeText,
+        profile,
+        targetTitles: payload.targetTitles,
+        preferences: payload.preferences
+      })
+    : null;
+
   let qc = await runQC({
     orderId: payload.orderId,
     tier,
@@ -166,7 +176,8 @@ export async function processOrder(payload: {
     cert_suggestions: certs,
     resume_ats_text: tier.flags.includeFullResumeRewrite ? atsResume : null,
     resume_patch_notes: patchNotes || null,
-    keyword_map: keywordMap
+    keyword_map: keywordMap,
+    pivot_pathways_json: pivotPathways
   });
 
   const reportPdf = await renderReportPdf({
@@ -178,7 +189,8 @@ export async function processOrder(payload: {
     outreach: trimmedOutreach,
     includeResume: tier.flags.includeFullResumeRewrite,
     patchNotes,
-    keywordMap
+    keywordMap,
+    pivotPathways
   });
 
   const reportPath = `reports/${payload.orderId}/report.pdf`;

@@ -27,6 +27,7 @@ STRIPE_PRICE_JOB_RADAR_49=
 STRIPE_PRICE_GHOST_PROOF_99=
 STRIPE_PRICE_INTERVIEW_BOOST_149=
 STRIPE_PRICE_RAPID_LITE_199=
+STRIPE_PRICE_PIVOT_PACK=
 STRIPE_PRICE_OFFER_REPORT_399=
 STRIPE_PRICE_OFFER_SPRINT_599=
 RESEND_API_KEY=
@@ -48,6 +49,7 @@ QC_PREMIUM_ALWAYS_REVIEW=true
 - `supabase/migrations/004_pricing_tiers.sql`
 - `supabase/migrations/005_qc_results.sql`
 - `supabase/migrations/006_intake_outputs.sql`
+- `supabase/migrations/007_pivot_pathways.sql`
 
 5) Create storage buckets in Supabase:
 - `reports`
@@ -69,7 +71,7 @@ npm run dev
 ```
 
 ## Stripe checkout (optional in dev)
-- POST `/api/stripe/checkout` with `{ "tierId": "job_radar" | "ghost_proof_list" | "interview_boost_kit" | "rapid_offer_lite" | "offer_farming_report" | "offer_sprint" }`
+- POST `/api/stripe/checkout` with `{ "tierId": "job_radar" | "ghost_proof_list" | "interview_boost_kit" | "rapid_offer_lite" | "pivot_pack" | "offer_farming_report" | "offer_sprint" }`
 - If `STRIPE_DISABLED=true`, you are redirected to `/intake?dev=1`.
 
 ## Intake submission (server endpoint)

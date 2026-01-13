@@ -216,6 +216,7 @@ function AdminOrderContent() {
         tier.flags.includeOutreachKit ? "Outreach kit" : null,
         tier.flags.includeCadence ? "Follow-up cadence" : null,
         tier.flags.includeCertPlan ? "Cert plan + gaps" : null,
+        tier.includesPivotPathways ? "Pivot Pathways" : null,
         tier.flags.expandedSourcing ? "Expanded sourcing" : null,
         tier.flags.priorityTurnaround ? "Priority turnaround" : null,
         tier.flags.includesSecondRevision ? "Second revision" : null,
