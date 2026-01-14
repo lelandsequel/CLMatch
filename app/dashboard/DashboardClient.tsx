@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { getMissingPublicEnv } from "../env-check";
 import { EnvMissingPanel } from "../../components/env-missing-panel";
 import { PageHeader } from "../../components/page-header";
-import { Card, CardPremium } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { Badge } from "../../components/ui/badge";
 import { Stepper } from "../../components/stepper";
@@ -97,6 +96,27 @@ function splitOutreach(text?: string | null) {
     };
   }
   return { recruiter: text, hm: text };
+}
+
+/* Glass card component for dashboard */
+function GlassCard({ 
+  children, 
+  className = "",
+  highlight = false
+}: { 
+  children: React.ReactNode; 
+  className?: string;
+  highlight?: boolean;
+}) {
+  return (
+    <div className={`p-6 rounded-xl backdrop-blur-sm border transition-all ${
+      highlight 
+        ? "bg-white/15 border-amber-300/40" 
+        : "bg-white/10 border-white/15 hover:bg-white/15 hover:border-white/25"
+    } ${className}`}>
+      {children}
+    </div>
+  );
 }
 
 export default function DashboardClient() {
@@ -206,40 +226,40 @@ export default function DashboardClient() {
 
   if (loading && !showSkeleton) {
     return (
-      <Card className="space-y-4">
-        <p className="text-sm text-ink-soft/80 dark:text-parchment-dark/70">Still loading your dashboard.</p>
-        <Button variant="secondary" onClick={() => window.location.reload()}>
+      <GlassCard className="space-y-4">
+        <p className="text-sm text-white/70">Still loading your dashboard.</p>
+        <Button variant="gold" onClick={() => window.location.reload()}>
           Retry
         </Button>
-      </Card>
+      </GlassCard>
     );
   }
 
   if (error) {
     return (
-      <Card className="space-y-4">
-        <p className="text-sm text-terracotta">{error}</p>
+      <GlassCard className="space-y-4">
+        <p className="text-sm text-red-400">{error}</p>
         {process.env.NODE_ENV !== "production" ? (
-          <Button variant="secondary" onClick={() => window.location.reload()}>
+          <Button variant="gold" onClick={() => window.location.reload()}>
             Retry
           </Button>
         ) : null}
-      </Card>
+      </GlassCard>
     );
   }
 
   if (!orders.length) {
     return (
-      <Card className="space-y-5">
-        <PageHeader title="Your Reports" subtitle="No reports yet. Start with pricing." />
+      <GlassCard className="space-y-5">
+        <PageHeader title="Your Reports" subtitle="No reports yet. Start with pricing." className="text-on-dark" />
         <Button variant="gold" onClick={() => (window.location.href = "/pricing")}>View pricing</Button>
-      </Card>
+      </GlassCard>
     );
   }
 
   return (
     <div className="relative space-y-10">
-      <PageHeader title="Your Reports" subtitle="Premium reports and live sourcing intelligence." />
+      <PageHeader title="Your Reports" subtitle="Premium reports and live sourcing intelligence." className="text-on-dark" />
 
       <div className="grid gap-8 lg:grid-cols-[0.35fr_0.65fr]">
         {/* Order List Sidebar */}
@@ -249,32 +269,32 @@ export default function DashboardClient() {
             const isActive = activeOrderId === order.id;
             
             return (
-              <Card
+              <div
                 key={order.id}
-                className={`cursor-pointer transition-all duration-300 animate-fade-in-up ${
+                className={`cursor-pointer p-5 rounded-xl backdrop-blur-sm border transition-all duration-300 animate-fade-in-up ${
                   isActive 
-                    ? "ring-2 ring-gold/50 border-gold/30 shadow-glow" 
-                    : "hover:border-gold/20 hover:shadow-card"
+                    ? "bg-white/15 border-amber-300/40 ring-1 ring-amber-300/20" 
+                    : "bg-white/10 border-white/15 hover:bg-white/15 hover:border-white/25"
                 }`}
                 style={{ animationDelay: `${index * 50}ms` }}
                 onClick={() => setActiveOrderId(order.id)}
               >
                 <div className="space-y-3">
                   <div className="flex items-start justify-between gap-3">
-                    <p className="text-[10px] uppercase tracking-[0.3em] text-gold font-medium">
+                    <p className="text-[10px] uppercase tracking-[0.3em] text-amber-300 font-medium">
                       {tier?.name ?? order.product_tier ?? "Offer Report"}
                     </p>
                     {isActive && (
-                      <span className="h-2 w-2 rounded-full bg-gold animate-pulse" />
+                      <span className="h-2 w-2 rounded-full bg-amber-300 animate-pulse" />
                     )}
                   </div>
-                  <p className="text-lg font-semibold text-ink dark:text-cream">{formatDate(order.created_at)}</p>
+                  <p className="text-lg font-semibold text-white">{formatDate(order.created_at)}</p>
                   {order.price_usd ? (
-                    <p className="text-xs text-ink-soft/60 dark:text-parchment-dark/50">${order.price_usd} paid</p>
+                    <p className="text-xs text-white/50">${order.price_usd} paid</p>
                   ) : null}
                   <Stepper status={statusMap[order.status]} />
                 </div>
-              </Card>
+              </div>
             );
           })}
         </div>
@@ -283,49 +303,48 @@ export default function DashboardClient() {
         {activeOrder ? (
           <div className="space-y-6">
             {/* Status Card */}
-            <CardPremium className="space-y-5">
+            <GlassCard highlight className="space-y-5">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div className="space-y-2">
-                  <p className="text-[10px] uppercase tracking-[0.3em] text-gold font-medium">Status</p>
-                  <p className="text-xl font-semibold text-ink dark:text-cream capitalize">
+                  <p className="text-[10px] uppercase tracking-[0.3em] text-amber-300 font-medium">Status</p>
+                  <p className="text-xl font-semibold text-white capitalize">
                     {activeOrder.status.replace("_", " ")}
                   </p>
                   {getTier(activeOrder.tier_id ?? activeOrder.product_tier ?? "") ? (
-                    <p className="text-xs text-ink-soft/70 dark:text-parchment-dark/60">
-                      {getTier(activeOrder.tier_id ?? activeOrder.product_tier ?? "")?.name} ·{" "}
+                    <p className="text-xs text-white/60">
                       {activeOrder.max_jobs ? `${activeOrder.max_jobs} jobs` : "Tiered"}
                     </p>
                   ) : null}
                   {activeOrder.price_usd ? (
-                    <p className="text-xs text-ink-soft/60 dark:text-parchment-dark/50">${activeOrder.price_usd} paid</p>
+                    <p className="text-xs text-white/50">${activeOrder.price_usd} paid</p>
                   ) : null}
                 </div>
                 <Stepper status={statusMap[activeOrder.status]} />
               </div>
               
               {latestQc ? (
-                <div className="flex flex-wrap items-center gap-3 pt-4 border-t border-gold/10">
-                  <Badge variant="premium">
+                <div className="flex flex-wrap items-center gap-3 pt-4 border-t border-white/10">
+                  <Badge variant="gold">
                     QC {Math.round((latestQc.confidence_total ?? 0) * 100)}%
                   </Badge>
                   {latestQc.hard_fail ? (
-                    <span className="text-xs text-terracotta font-medium">QC flags detected</span>
+                    <span className="text-xs text-red-400 font-medium">QC flags detected</span>
                   ) : null}
                 </div>
               ) : null}
 
               {/* Artifacts Download */}
               {activeOrder.artifacts.length > 0 && (
-                <div className="grid gap-3 md:grid-cols-3 pt-4 border-t border-gold/10">
+                <div className="grid gap-3 md:grid-cols-3 pt-4 border-t border-white/10">
                   {activeOrder.artifacts.map((artifact) => (
                     <a
                       key={artifact.id}
                       href={artifact.signed_url}
                       target="_blank"
                       rel="noreferrer"
-                      className="group flex items-center gap-3 rounded-xl border border-gold/20 bg-gradient-to-r from-cream/60 to-parchment/40 px-4 py-3 text-sm font-medium text-ink hover:border-gold/40 hover:shadow-soft transition-all duration-200 dark:from-navy/60 dark:to-navy-deep/40 dark:text-cream"
+                      className="group flex items-center gap-3 rounded-xl border border-amber-300/30 bg-amber-300/10 px-4 py-3 text-sm font-medium text-white hover:bg-amber-300/20 hover:border-amber-300/50 transition-all duration-200"
                     >
-                      <span className="flex-shrink-0 h-8 w-8 rounded-lg bg-gold/10 flex items-center justify-center text-gold group-hover:bg-gold/20 transition-colors duration-200">
+                      <span className="flex-shrink-0 h-8 w-8 rounded-lg bg-amber-300/20 flex items-center justify-center text-amber-300 group-hover:bg-amber-300/30 transition-colors duration-200">
                         ↓
                       </span>
                       <span>Download {artifact.kind.replace("_", " ")}</span>
@@ -333,78 +352,76 @@ export default function DashboardClient() {
                   ))}
                 </div>
               )}
-            </CardPremium>
+            </GlassCard>
 
             {/* Executive QA Card */}
             {isPremium ? (
-              <Card className="relative overflow-hidden space-y-4">
-                <div className="absolute -top-10 -right-10 w-32 h-32 bg-gradient-radial from-gold/10 to-transparent rounded-full blur-2xl" />
-                
-                <div className="relative flex items-center justify-between">
-                  <p className="text-[10px] uppercase tracking-[0.3em] text-gold font-medium">Executive QA Included</p>
-                  <Badge variant="premium">Executive QA</Badge>
+              <GlassCard className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-[10px] uppercase tracking-[0.3em] text-amber-300 font-medium">Executive QA Included</p>
+                  <Badge variant="gold">Executive QA</Badge>
                 </div>
-                <p className="text-sm font-medium text-ink dark:text-cream">In Executive Review</p>
-                <p className="text-xs text-ink-soft/70 dark:text-parchment-dark/60">
+                <p className="text-sm font-medium text-white">In Executive Review</p>
+                <p className="text-xs text-white/60">
                   A seasoned executive (15+ years) audits all outputs before delivery.
                 </p>
-                <p className="text-xs text-ink-soft/60 dark:text-parchment-dark/50">Typically within 1-2 business days.</p>
-                <div className="rounded-xl border border-gold/20 bg-gradient-to-r from-cream/60 to-parchment/40 p-4 text-xs text-ink-soft/80 dark:from-navy/60 dark:to-navy-deep/40 dark:text-parchment-dark/70">
+                <p className="text-xs text-white/50">Typically within 1-2 business days.</p>
+                <div className="rounded-xl border border-white/10 bg-white/5 p-4 text-xs text-white/70">
                   AI + human audit: We verify job quality, ATS alignment, and professional tone.
                 </div>
-              </Card>
+              </GlassCard>
             ) : null}
 
             {/* Processing Status Cards */}
             {!isPremium && activeOrder.status === "processing" ? (
-              <Card className="space-y-2">
+              <GlassCard className="space-y-2">
                 <div className="flex items-center gap-3">
-                  <span className="h-2 w-2 rounded-full bg-gold animate-pulse" />
-                  <p className="text-sm text-ink-soft/80 dark:text-parchment-dark/70">Automated QC is running.</p>
+                  <span className="h-2 w-2 rounded-full bg-amber-300 animate-pulse" />
+                  <p className="text-sm text-white/70">Automated QC is running.</p>
                 </div>
-              </Card>
+              </GlassCard>
             ) : null}
 
             {!isPremium && activeOrder.status === "qc_repairing" ? (
-              <Card className="space-y-2">
+              <GlassCard className="space-y-2">
                 <div className="flex items-center gap-3">
-                  <span className="h-2 w-2 rounded-full bg-amber animate-pulse" />
-                  <p className="text-sm text-ink-soft/80 dark:text-parchment-dark/70">Auto-repair in progress. We are tightening quality now.</p>
+                  <span className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
+                  <p className="text-sm text-white/70">Auto-repair in progress. We are tightening quality now.</p>
                 </div>
-              </Card>
+              </GlassCard>
             ) : null}
 
             {!isPremium && activeOrder.status === "auto_qc_failed" ? (
-              <Card className="space-y-4 border-terracotta/30">
-                <p className="text-sm text-terracotta font-medium">We hit a quality issue. We will fix it or refund.</p>
-                <Button variant="secondary">Contact support</Button>
-              </Card>
+              <div className="p-6 rounded-xl backdrop-blur-sm bg-red-500/10 border border-red-400/30 space-y-4">
+                <p className="text-sm text-red-300 font-medium">We hit a quality issue. We will fix it or refund.</p>
+                <Button variant="gold">Contact support</Button>
+              </div>
             ) : null}
 
             {!isPremium && (activeOrder.status === "approved_auto" || activeOrder.status === "delivered") ? (
-              <Card className="space-y-2 border-sage/30">
+              <div className="p-6 rounded-xl backdrop-blur-sm bg-green-500/10 border border-green-400/30 space-y-2">
                 <div className="flex items-center gap-3">
-                  <span className="h-2 w-2 rounded-full bg-sage" />
-                  <p className="text-sm text-sage font-medium">Your report is ready.</p>
+                  <span className="h-2 w-2 rounded-full bg-green-400" />
+                  <p className="text-sm text-green-300 font-medium">Your report is ready.</p>
                 </div>
-              </Card>
+              </div>
             ) : null}
 
             {/* Job Matches Card */}
-            <Card className="space-y-5">
+            <GlassCard className="space-y-5">
               <div className="flex flex-wrap items-center justify-between gap-4">
-                <h3 className="text-lg font-semibold text-ink dark:text-cream">Job matches</h3>
+                <h3 className="text-lg font-semibold text-white">Job matches</h3>
                 
                 {/* Filters */}
                 <div className="flex flex-wrap gap-3">
                   <input
-                    className="h-10 rounded-xl border border-gold/20 bg-gradient-to-r from-cream/80 to-parchment/60 px-4 text-sm text-ink placeholder:text-ink-soft/40 focus:border-gold/40 focus:outline-none focus:ring-2 focus:ring-gold/10 transition-all duration-200 dark:from-navy/80 dark:to-navy-deep/60 dark:text-cream dark:border-gold/10"
+                    className="h-10 rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm px-4 text-sm text-white placeholder:text-white/40 focus:border-amber-300/40 focus:outline-none focus:ring-2 focus:ring-amber-300/10 transition-all duration-200"
                     placeholder="Search title/company"
                     value={search}
                     onChange={(event) => setSearch(event.target.value)}
                   />
                   <select
-                    className="h-10 rounded-xl border border-gold/20 bg-gradient-to-r from-cream/80 to-parchment/60 px-3 text-sm text-ink focus:border-gold/40 focus:outline-none focus:ring-2 focus:ring-gold/10 transition-all duration-200 dark:from-navy/80 dark:to-navy-deep/60 dark:text-cream dark:border-gold/10"
+                    className="h-10 rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm px-3 text-sm text-white focus:border-amber-300/40 focus:outline-none focus:ring-2 focus:ring-amber-300/10 transition-all duration-200"
                     value={fitMin}
                     onChange={(event) => setFitMin(Number(event.target.value))}
                   >
@@ -413,7 +430,7 @@ export default function DashboardClient() {
                     <option value={75}>Fit 75+</option>
                   </select>
                   <select
-                    className="h-10 rounded-xl border border-gold/20 bg-gradient-to-r from-cream/80 to-parchment/60 px-3 text-sm text-ink focus:border-gold/40 focus:outline-none focus:ring-2 focus:ring-gold/10 transition-all duration-200 dark:from-navy/80 dark:to-navy-deep/60 dark:text-cream dark:border-gold/10"
+                    className="h-10 rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm px-3 text-sm text-white focus:border-amber-300/40 focus:outline-none focus:ring-2 focus:ring-amber-300/10 transition-all duration-200"
                     value={ghostMax}
                     onChange={(event) => setGhostMax(Number(event.target.value))}
                   >
@@ -422,7 +439,7 @@ export default function DashboardClient() {
                     <option value={40}>Ghost max 40</option>
                   </select>
                   <select
-                    className="h-10 rounded-xl border border-gold/20 bg-gradient-to-r from-cream/80 to-parchment/60 px-3 text-sm text-ink focus:border-gold/40 focus:outline-none focus:ring-2 focus:ring-gold/10 transition-all duration-200 dark:from-navy/80 dark:to-navy-deep/60 dark:text-cream dark:border-gold/10"
+                    className="h-10 rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm px-3 text-sm text-white focus:border-amber-300/40 focus:outline-none focus:ring-2 focus:ring-amber-300/10 transition-all duration-200"
                     value={atsFilter}
                     onChange={(event) => setAtsFilter(event.target.value)}
                   >
@@ -438,23 +455,23 @@ export default function DashboardClient() {
               {/* Jobs Table */}
               <div className="max-h-[420px] overflow-auto -mx-6 px-6">
                 <table className="w-full text-sm">
-                  <thead className="sticky top-0 bg-gradient-to-r from-white/95 to-cream/95 dark:from-navy/95 dark:to-navy-deep/95 backdrop-blur-sm">
-                    <tr className="border-b border-gold/20">
-                      <th className="py-4 pr-4 text-left text-[10px] uppercase tracking-[0.2em] text-gold font-semibold">Role</th>
-                      <th className="py-4 pr-4 text-left text-[10px] uppercase tracking-[0.2em] text-gold font-semibold">Scores</th>
-                      <th className="py-4 pr-4 text-left text-[10px] uppercase tracking-[0.2em] text-gold font-semibold">ATS</th>
-                      <th className="py-4 text-left text-[10px] uppercase tracking-[0.2em] text-gold font-semibold"></th>
+                  <thead className="sticky top-0 bg-black/40 backdrop-blur-sm">
+                    <tr className="border-b border-white/20">
+                      <th className="py-4 pr-4 text-left text-[10px] uppercase tracking-[0.2em] text-amber-300 font-semibold">Role</th>
+                      <th className="py-4 pr-4 text-left text-[10px] uppercase tracking-[0.2em] text-amber-300 font-semibold">Scores</th>
+                      <th className="py-4 pr-4 text-left text-[10px] uppercase tracking-[0.2em] text-amber-300 font-semibold">ATS</th>
+                      <th className="py-4 text-left text-[10px] uppercase tracking-[0.2em] text-amber-300 font-semibold"></th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredJobs.map((job, index) => (
                       <tr 
                         key={`${job.title}-${index}`} 
-                        className="border-b border-gold/10 hover:bg-gold/[0.03] transition-colors duration-150"
+                        className="border-b border-white/10 hover:bg-white/5 transition-colors duration-150"
                       >
                         <td className="py-4 pr-4">
-                          <p className="font-medium text-ink dark:text-cream">{job.title}</p>
-                          <p className="text-xs text-ink-soft/60 dark:text-parchment-dark/50">{job.company_name}</p>
+                          <p className="font-medium text-white">{job.title}</p>
+                          <p className="text-xs text-white/50">{job.company_name}</p>
                         </td>
                         <td className="py-4 pr-4 space-y-2">
                           <FitBadge score={job.fit_score} />
@@ -470,7 +487,7 @@ export default function DashboardClient() {
                                 href={job.apply_url}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="rounded-full border border-gold/30 bg-gold/5 px-4 py-1.5 text-xs font-medium text-gold hover:bg-gold/15 hover:border-gold/50 transition-colors duration-200"
+                                className="rounded-full border border-amber-300/30 bg-amber-300/10 px-4 py-1.5 text-xs font-medium text-amber-200 hover:bg-amber-300/20 hover:border-amber-300/50 transition-colors duration-200"
                               >
                                 Apply
                               </a>
@@ -488,58 +505,58 @@ export default function DashboardClient() {
                   </tbody>
                 </table>
                 {!filteredJobs.length ? (
-                  <p className="py-8 text-center text-sm text-ink-soft/60 dark:text-parchment-dark/50">No jobs match filters.</p>
+                  <p className="py-8 text-center text-sm text-white/50">No jobs match filters.</p>
                 ) : null}
               </div>
-            </Card>
+            </GlassCard>
 
             {/* Outreach + Improvements Card */}
-            <Card className="space-y-5">
-              <h3 className="text-lg font-semibold text-ink dark:text-cream">Outreach + improvements</h3>
+            <GlassCard className="space-y-5">
+              <h3 className="text-lg font-semibold text-white">Outreach + improvements</h3>
               
               <div className="grid gap-5 md:grid-cols-2">
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <p className="text-[10px] uppercase tracking-[0.3em] text-gold font-medium">Recruiter</p>
+                    <p className="text-[10px] uppercase tracking-[0.3em] text-amber-300 font-medium">Recruiter</p>
                     {outreach.recruiter ? (
                       <CopyButton text={outreach.recruiter} label="Copy" copiedLabel="Copied" />
                     ) : null}
                   </div>
-                  <pre className="whitespace-pre-wrap rounded-xl border border-gold/20 bg-gradient-to-br from-cream/60 to-parchment/40 p-4 text-xs text-ink-soft leading-relaxed dark:from-navy/60 dark:to-navy-deep/40 dark:text-parchment-dark">
+                  <pre className="whitespace-pre-wrap rounded-xl border border-white/10 bg-white/5 p-4 text-xs text-white/70 leading-relaxed">
                     {outreach.recruiter || ""}
                   </pre>
                 </div>
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <p className="text-[10px] uppercase tracking-[0.3em] text-gold font-medium">Hiring manager</p>
+                    <p className="text-[10px] uppercase tracking-[0.3em] text-amber-300 font-medium">Hiring manager</p>
                     {outreach.hm ? (
                       <CopyButton text={outreach.hm} label="Copy" copiedLabel="Copied" />
                     ) : null}
                   </div>
-                  <pre className="whitespace-pre-wrap rounded-xl border border-gold/20 bg-gradient-to-br from-cream/60 to-parchment/40 p-4 text-xs text-ink-soft leading-relaxed dark:from-navy/60 dark:to-navy-deep/40 dark:text-parchment-dark">
+                  <pre className="whitespace-pre-wrap rounded-xl border border-white/10 bg-white/5 p-4 text-xs text-white/70 leading-relaxed">
                     {outreach.hm || ""}
                   </pre>
                 </div>
               </div>
               
-              <div className="grid gap-5 md:grid-cols-2 pt-5 border-t border-gold/10">
+              <div className="grid gap-5 md:grid-cols-2 pt-5 border-t border-white/10">
                 <div>
-                  <p className="text-[10px] uppercase tracking-[0.3em] text-gold font-medium mb-3">Skill gaps</p>
-                  <ul className="space-y-2 text-sm text-ink-soft/80 dark:text-parchment-dark/70">
+                  <p className="text-[10px] uppercase tracking-[0.3em] text-amber-300 font-medium mb-3">Skill gaps</p>
+                  <ul className="space-y-2 text-sm text-white/70">
                     {(intake?.gap_suggestions ?? []).map((gap) => (
                       <li key={gap} className="flex items-start gap-2.5">
-                        <span className="flex-shrink-0 mt-1.5 h-1.5 w-1.5 rounded-full bg-amber/60" />
+                        <span className="flex-shrink-0 mt-1.5 h-1.5 w-1.5 rounded-full bg-amber-400/60" />
                         <span>{gap}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
                 <div>
-                  <p className="text-[10px] uppercase tracking-[0.3em] text-gold font-medium mb-3">Certifications</p>
-                  <ul className="space-y-2 text-sm text-ink-soft/80 dark:text-parchment-dark/70">
+                  <p className="text-[10px] uppercase tracking-[0.3em] text-amber-300 font-medium mb-3">Certifications</p>
+                  <ul className="space-y-2 text-sm text-white/70">
                     {(intake?.cert_suggestions ?? []).map((cert) => (
                       <li key={cert} className="flex items-start gap-2.5">
-                        <span className="flex-shrink-0 mt-1.5 h-1.5 w-1.5 rounded-full bg-sage/60" />
+                        <span className="flex-shrink-0 mt-1.5 h-1.5 w-1.5 rounded-full bg-green-400/60" />
                         <span>{cert}</span>
                       </li>
                     ))}
@@ -547,46 +564,46 @@ export default function DashboardClient() {
                 </div>
               </div>
               
-              <Button variant="secondary">Request refresh</Button>
-            </Card>
+              <Button variant="gold">Request refresh</Button>
+            </GlassCard>
 
             {/* Pivot Pathways Card */}
             {pivots.length ? (
-              <Card className="space-y-5">
+              <GlassCard className="space-y-5">
                 <div className="flex flex-wrap items-center justify-between gap-3">
-                  <h3 className="text-lg font-semibold text-ink dark:text-cream">Pivot Pathways™</h3>
-                  <Badge variant="premium">Pivot Pathways™</Badge>
+                  <h3 className="text-lg font-semibold text-white">Pivot Pathways™</h3>
+                  <Badge variant="gold">Pivot Pathways™</Badge>
                 </div>
                 
                 <div className="grid gap-4">
                   {pivots.slice(0, 4).map((pivot, index) => (
                     <div
                       key={`${pivot.industry}-${index}`}
-                      className="group rounded-xl border border-gold/20 bg-gradient-to-br from-cream/60 to-parchment/40 p-5 hover:border-gold/40 hover:shadow-soft transition-all duration-300 dark:from-navy/60 dark:to-navy-deep/40"
+                      className="group rounded-xl border border-white/10 bg-white/5 p-5 hover:border-white/20 hover:bg-white/10 transition-all duration-300"
                     >
-                      <p className="text-[10px] uppercase tracking-[0.3em] text-gold font-medium">{pivot.industry}</p>
-                      <p className="mt-2 font-semibold text-ink dark:text-cream">
+                      <p className="text-[10px] uppercase tracking-[0.3em] text-amber-300 font-medium">{pivot.industry}</p>
+                      <p className="mt-2 font-semibold text-white">
                         {pivot.role_titles.slice(0, 6).join(" · ")}
                       </p>
                       
                       <div className="mt-4 grid gap-5 md:grid-cols-2">
                         <div>
-                          <p className="text-[10px] uppercase tracking-[0.3em] text-gold/70 font-medium mb-2">Why you fit</p>
-                          <ul className="space-y-1.5 text-xs text-ink-soft/80 dark:text-parchment-dark/70">
+                          <p className="text-[10px] uppercase tracking-[0.3em] text-amber-300/70 font-medium mb-2">Why you fit</p>
+                          <ul className="space-y-1.5 text-xs text-white/70">
                             {pivot.why_you_fit.slice(0, 5).map((item) => (
                               <li key={item} className="flex items-start gap-2">
-                                <span className="flex-shrink-0 mt-1 h-1 w-1 rounded-full bg-sage" />
+                                <span className="flex-shrink-0 mt-1 h-1 w-1 rounded-full bg-green-400" />
                                 <span>{item}</span>
                               </li>
                             ))}
                           </ul>
                         </div>
                         <div>
-                          <p className="text-[10px] uppercase tracking-[0.3em] text-gold/70 font-medium mb-2">Pivot narrative</p>
-                          <ul className="space-y-1.5 text-xs text-ink-soft/80 dark:text-parchment-dark/70">
+                          <p className="text-[10px] uppercase tracking-[0.3em] text-amber-300/70 font-medium mb-2">Pivot narrative</p>
+                          <ul className="space-y-1.5 text-xs text-white/70">
                             {pivot.pivot_narrative_bullets.slice(0, 5).map((item) => (
                               <li key={item} className="flex items-start gap-2">
-                                <span className="flex-shrink-0 mt-1 h-1 w-1 rounded-full bg-gold/40" />
+                                <span className="flex-shrink-0 mt-1 h-1 w-1 rounded-full bg-amber-300/40" />
                                 <span>{item}</span>
                               </li>
                             ))}
@@ -595,8 +612,8 @@ export default function DashboardClient() {
                       </div>
                       
                       {pivot.recommended_certs.length ? (
-                        <div className="mt-4 pt-4 border-t border-gold/10">
-                          <p className="text-[10px] uppercase tracking-[0.3em] text-gold/70 font-medium mb-3">Cert stack</p>
+                        <div className="mt-4 pt-4 border-t border-white/10">
+                          <p className="text-[10px] uppercase tracking-[0.3em] text-amber-300/70 font-medium mb-3">Cert stack</p>
                           <div className="flex flex-wrap gap-2">
                             {pivot.recommended_certs.slice(0, 4).map((cert) => (
                               <a
@@ -605,7 +622,7 @@ export default function DashboardClient() {
                                 target="_blank"
                                 rel="noreferrer"
                                 title={cert.why_it_matters}
-                                className="rounded-full border border-gold/30 bg-gold/5 px-3 py-1 text-[10px] text-gold hover:bg-gold/15 hover:border-gold/50 transition-colors duration-200"
+                                className="rounded-full border border-amber-300/30 bg-amber-300/10 px-3 py-1 text-[10px] text-amber-200 hover:bg-amber-300/20 hover:border-amber-300/50 transition-colors duration-200"
                               >
                                 {cert.name}
                               </a>
@@ -616,7 +633,7 @@ export default function DashboardClient() {
                     </div>
                   ))}
                 </div>
-              </Card>
+              </GlassCard>
             ) : null}
           </div>
         ) : null}

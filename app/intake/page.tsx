@@ -18,33 +18,30 @@ export default async function IntakePage({
   const isAllowed = devMode || Boolean(sessionId);
 
   return (
-    <AppShell>
-      <Section className="relative py-16 md:py-20 overflow-hidden">
-        {/* Decorative background elements */}
-        <div className="absolute -top-40 -right-40 w-[500px] h-[500px] bg-gradient-radial from-gold/6 via-gold/2 to-transparent rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-20 -left-20 w-[300px] h-[300px] bg-gradient-radial from-amber/5 via-transparent to-transparent rounded-full blur-3xl pointer-events-none" />
-        
+    <AppShell heroMode>
+      <Section className="py-16 md:py-20">
         <div className="relative mx-auto max-w-3xl space-y-8">
           <div className="space-y-4">
             <Badge variant="gold">Premium Intake</Badge>
             <PageHeader
               title="Client Intake"
               subtitle="Paid clients only. This intake fuels the sourcing engine and report generation."
+              className="text-on-dark"
             />
           </div>
           
           {devMode ? (
-            <div className="flex items-center gap-3 rounded-2xl border border-gold/30 bg-gradient-to-r from-gold/10 to-amber/5 p-5 text-sm backdrop-blur-sm">
-              <span className="h-2 w-2 rounded-full bg-gold animate-pulse" />
-              <span className="text-gold-dark dark:text-gold font-medium">DEV MODE:</span>
-              <span className="text-ink-soft/80 dark:text-parchment-dark/70">Stripe bypass enabled.</span>
+            <div className="flex items-center gap-3 rounded-2xl border border-amber-300/30 bg-amber-300/10 backdrop-blur-sm p-5 text-sm">
+              <span className="h-2 w-2 rounded-full bg-amber-300 animate-pulse" />
+              <span className="text-amber-200 font-medium">DEV MODE:</span>
+              <span className="text-white/70">Stripe bypass enabled.</span>
             </div>
           ) : null}
           
           {!isAllowed ? (
-            <div className="flex items-center gap-3 rounded-2xl border border-terracotta/30 bg-gradient-to-r from-terracotta/10 to-terracotta/5 p-5 text-sm backdrop-blur-sm">
-              <span className="h-2 w-2 rounded-full bg-terracotta" />
-              <span className="text-terracotta">Missing Stripe session. Please return to pricing and complete checkout.</span>
+            <div className="flex items-center gap-3 rounded-2xl border border-red-400/30 bg-red-500/10 backdrop-blur-sm p-5 text-sm">
+              <span className="h-2 w-2 rounded-full bg-red-400" />
+              <span className="text-red-300">Missing Stripe session. Please return to pricing and complete checkout.</span>
             </div>
           ) : null}
 

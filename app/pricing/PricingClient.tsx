@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Button } from "../../components/ui/button";
-import { Card, CardDescription, CardHeader, CardTitle, CardPremium, CardHighlight } from "../../components/ui/card";
 import { Badge } from "../../components/ui/badge";
 import type { Tier } from "../../lib/pricing";
 import { tierSortOrder } from "../../lib/pricing";
@@ -31,7 +30,7 @@ export default function PricingClient({
     { label: "Follow-up cadence", value: (tier: Tier) => (tier.flags.includeCadence ? "Yes" : "No") },
     { label: "Cert plan + gaps", value: (tier: Tier) => (tier.flags.includeCertPlan ? "Yes" : "No") },
     {
-      label: "Pivot Pathways™ (transferable skills + alternative industries + pivot narrative)",
+      label: "Pivot Pathways™",
       value: (tier: Tier) => (tier.includesPivotPathways ? "✅" : "—")
     },
     { label: "Expanded sourcing", value: (tier: Tier) => (tier.flags.expandedSourcing ? "Yes" : "No") },
@@ -59,63 +58,60 @@ export default function PricingClient({
     <section className="mt-16 space-y-16">
       {/* Status Messages */}
       {stripeDisabled ? (
-        <div className="rounded-2xl border border-gold/30 bg-gradient-to-r from-gold/10 to-amber/5 p-5 text-sm text-gold-dark dark:text-gold backdrop-blur-sm">
+        <div className="rounded-2xl border border-amber-300/30 backdrop-blur-sm bg-amber-300/10 p-5 text-sm text-amber-200">
           <span className="font-semibold">DEV MODE:</span> Stripe bypass enabled. Orders will be created as paid.
         </div>
       ) : null}
 
       {!stripeDisabled && !stripeReady ? (
-        <div className="rounded-2xl border border-terracotta/30 bg-gradient-to-r from-terracotta/10 to-terracotta/5 p-5 text-sm text-terracotta backdrop-blur-sm">
+        <div className="rounded-2xl border border-red-400/30 backdrop-blur-sm bg-red-400/10 p-5 text-sm text-red-300">
           <span className="font-semibold">Setup Required:</span> Stripe not configured. Set STRIPE_SECRET_KEY, NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY, and all
           Price IDs before taking payments.
         </div>
       ) : null}
 
-      {/* ═══════════════════════════════════════════════════════════════════
-          Quick Wins Section
-          ═══════════════════════════════════════════════════════════════════ */}
+      {/* Quick Wins Section */}
       <div className="space-y-8">
         <div className="flex flex-wrap items-center gap-4">
-          <Badge variant="default">Quick wins</Badge>
-          <p className="text-sm text-ink-soft/70 dark:text-parchment-dark/60">Fast, focused deliverables.</p>
-          {/* Decorative line */}
+          <Badge variant="gold">Quick wins</Badge>
+          <p className="text-sm text-white/70 [text-shadow:0_1px_4px_rgba(0,0,0,0.5)]">Fast, focused deliverables.</p>
           <div className="hidden md:flex flex-1 items-center gap-2 ml-4">
-            <div className="h-px flex-1 bg-gradient-to-r from-gold/20 to-transparent" />
+            <div className="h-px flex-1 bg-gradient-to-r from-amber-300/30 to-transparent" />
           </div>
         </div>
         
         <div className="grid gap-6 md:grid-cols-3">
           {quickWins.map((tier, index) => (
-            <Card 
+            <div 
               key={tier.id} 
-              className="group flex h-full flex-col animate-fade-in-up"
+              className="group flex h-full flex-col p-6 rounded-xl backdrop-blur-sm bg-white/10 border border-white/15 hover:bg-white/15 hover:border-white/25 transition-all animate-fade-in-up"
               style={{ animationDelay: `${index * 100}ms` }}
             >
-              <CardHeader>
-                <CardTitle className="group-hover:text-gold-dark dark:group-hover:text-gold transition-colors duration-200">
+              <div className="space-y-1 mb-4">
+                <h3 className="text-lg font-semibold text-white group-hover:text-amber-200 transition-colors">
                   {tier.name}
-                </CardTitle>
-                <CardDescription>{tier.tagline}</CardDescription>
-              </CardHeader>
+                </h3>
+                <p className="text-sm text-white/60">{tier.tagline}</p>
+              </div>
               
               <div className="flex-1 space-y-5">
                 {/* Price */}
                 <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-bold bg-gradient-to-br from-ink to-ink-soft bg-clip-text text-transparent dark:from-cream dark:to-gold-muted">
+                  <span className="text-4xl font-bold text-white">
                     ${tier.priceUSD}
                   </span>
                 </div>
                 
                 {/* Turnaround */}
-                <p className="text-[10px] uppercase tracking-[0.3em] text-gold font-medium">
+                <p className="text-[10px] uppercase tracking-[0.3em] text-amber-300 font-medium">
                   Turnaround: {tier.delivery}
                 </p>
                 
                 {/* Features */}
-                <ul className="space-y-2.5 text-sm text-ink-soft/80 dark:text-parchment-dark/70">
+                <ul className="space-y-2.5 text-sm text-white/70">
                   {tier.bullets.map((item) => (
                     <li key={item} className="flex items-start gap-2.5">
-                      <span className="flex-shrink-0 mt-1.5 h-1.5 w-1.5 rounded-full bg-gold/60" />
+                      <span className="flex-shrink-0 mt-1.5 h-1.5 w-1.5 rounded-full bg-amber-300/60" />
                       <span>{item}</span>
                     </li>
                   ))}
@@ -123,37 +119,32 @@ export default function PricingClient({
               </div>
               
               <Button
+                variant="gold"
                 className="mt-6 w-full"
                 onClick={() => startCheckout(tier.id)}
                 disabled={loadingTier === tier.id || (!stripeDisabled && !stripeReady)}
               >
                 {loadingTier === tier.id ? "Redirecting..." : tier.ctaLabel}
               </Button>
-              
-              {/* Hover accent line */}
-              <div className="absolute bottom-0 left-0 h-0.5 w-0 bg-gradient-to-r from-gold to-gold-light group-hover:w-full transition-all duration-500" />
-            </Card>
+            </div>
           ))}
         </div>
       </div>
 
       {/* Decorative divider */}
       <div className="flex items-center justify-center gap-3">
-        <div className="h-px w-20 bg-gradient-to-r from-transparent to-gold/30" />
-        <div className="h-2 w-2 rounded-full bg-gold/40" />
-        <div className="h-px w-20 bg-gradient-to-l from-transparent to-gold/30" />
+        <div className="h-px w-20 bg-gradient-to-r from-transparent to-amber-300/30" />
+        <div className="h-2 w-2 rounded-full bg-amber-300/40" />
+        <div className="h-px w-20 bg-gradient-to-l from-transparent to-amber-300/30" />
       </div>
 
-      {/* ═══════════════════════════════════════════════════════════════════
-          Full Engine Section
-          ═══════════════════════════════════════════════════════════════════ */}
+      {/* Full Engine Section */}
       <div className="space-y-8">
         <div className="flex flex-wrap items-center gap-4">
-          <Badge variant="premium">Full engine</Badge>
-          <p className="text-sm text-ink-soft/70 dark:text-parchment-dark/60">Complete sourcing + ATS assets.</p>
-          {/* Decorative line */}
+          <Badge variant="gold">Full engine</Badge>
+          <p className="text-sm text-white/70 [text-shadow:0_1px_4px_rgba(0,0,0,0.5)]">Complete sourcing + ATS assets.</p>
           <div className="hidden md:flex flex-1 items-center gap-2 ml-4">
-            <div className="h-px flex-1 bg-gradient-to-r from-gold/20 to-transparent" />
+            <div className="h-px flex-1 bg-gradient-to-r from-amber-300/30 to-transparent" />
           </div>
         </div>
         
@@ -170,105 +161,103 @@ export default function PricingClient({
                     : "");
             
             const isHighlighted = tier.id === "offer_farming_report" || tier.id === "offer_sprint";
-            const CardComponent = isHighlighted ? CardPremium : Card;
             
             return (
-              <CardComponent 
+              <div 
                 key={tier.id} 
-                className={`group flex h-full flex-col animate-fade-in-up ${isHighlighted ? 'ring-1 ring-gold/30' : ''}`}
+                className={`group flex h-full flex-col p-6 rounded-xl backdrop-blur-sm border transition-all animate-fade-in-up ${
+                  isHighlighted 
+                    ? 'bg-white/15 border-amber-300/40 ring-1 ring-amber-300/20' 
+                    : 'bg-white/10 border-white/15 hover:bg-white/15 hover:border-white/25'
+                }`}
                 style={{ animationDelay: `${index * 100}ms` }}
               >
-                <CardHeader>
+                <div className="space-y-1 mb-4">
                   <div className="flex items-start justify-between gap-3">
-                    <CardTitle className="group-hover:text-gold-dark dark:group-hover:text-gold transition-colors duration-200">
+                    <h3 className="text-lg font-semibold text-white group-hover:text-amber-200 transition-colors">
                       {tier.name}
-                    </CardTitle>
+                    </h3>
                     {badge ? (
-                      <span className="flex-shrink-0 rounded-full bg-gradient-to-r from-ink to-ink-soft px-3 py-1 text-[10px] uppercase tracking-wider text-gold-light font-semibold shadow-button">
+                      <span className="flex-shrink-0 rounded-full bg-amber-300/20 border border-amber-300/30 px-3 py-1 text-[10px] uppercase tracking-wider text-amber-200 font-semibold">
                         {badge}
                       </span>
                     ) : null}
                   </div>
-                  <CardDescription>{tier.tagline}</CardDescription>
-                </CardHeader>
+                  <p className="text-sm text-white/60">{tier.tagline}</p>
+                </div>
                 
                 <div className="flex-1 space-y-5">
                   {/* Price */}
                   <div className="flex items-baseline gap-1">
-                    <span className="text-4xl font-bold bg-gradient-to-br from-ink to-ink-soft bg-clip-text text-transparent dark:from-cream dark:to-gold-muted">
+                    <span className="text-4xl font-bold text-white">
                       ${tier.priceUSD}
                     </span>
                   </div>
                   
                   {/* Turnaround */}
-                  <p className="text-[10px] uppercase tracking-[0.3em] text-gold font-medium">
+                  <p className="text-[10px] uppercase tracking-[0.3em] text-amber-300 font-medium">
                     Turnaround: {tier.delivery}
                   </p>
                   
                   {/* Executive QA Badge */}
                   {tier.requiresHumanQA ? (
-                    <div className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-ink to-ink-soft px-4 py-1.5 text-[10px] uppercase tracking-wider text-gold-light font-semibold shadow-button">
-                      <span className="h-1.5 w-1.5 rounded-full bg-gold animate-pulse" />
+                    <div className="inline-flex items-center gap-2 rounded-full bg-amber-300/20 border border-amber-300/30 px-4 py-1.5 text-[10px] uppercase tracking-wider text-amber-200 font-semibold">
+                      <span className="h-1.5 w-1.5 rounded-full bg-amber-300 animate-pulse" />
                       Executive QA Included
                     </div>
                   ) : null}
                   
                   {/* Features */}
-                  <ul className="space-y-2.5 text-sm text-ink-soft/80 dark:text-parchment-dark/70">
+                  <ul className="space-y-2.5 text-sm text-white/70">
                     {tier.bullets.map((item) => (
                       <li key={item} className="flex items-start gap-2.5">
-                        <span className="flex-shrink-0 mt-1.5 h-1.5 w-1.5 rounded-full bg-gold/60" />
+                        <span className="flex-shrink-0 mt-1.5 h-1.5 w-1.5 rounded-full bg-amber-300/60" />
                         <span>{item}</span>
                       </li>
                     ))}
                   </ul>
                   
                   {tier.requiresHumanQA ? (
-                    <p className="text-xs text-ink-soft/60 dark:text-parchment-dark/50 italic">
+                    <p className="text-xs text-white/50 italic">
                       Human audit before delivery.
                     </p>
                   ) : null}
                 </div>
                 
                 <Button
-                  variant={isHighlighted ? "gold" : "primary"}
+                  variant="gold"
                   className="mt-6 w-full"
                   onClick={() => startCheckout(tier.id)}
                   disabled={loadingTier === tier.id || (!stripeDisabled && !stripeReady)}
                 >
                   {loadingTier === tier.id ? "Redirecting..." : tier.ctaLabel}
                 </Button>
-                
-                {/* Hover accent line */}
-                <div className="absolute bottom-0 left-0 h-0.5 w-0 bg-gradient-to-r from-gold to-gold-light group-hover:w-full transition-all duration-500" />
-              </CardComponent>
+              </div>
             );
           })}
         </div>
       </div>
 
-      {/* ═══════════════════════════════════════════════════════════════════
-          Feature Comparison Table
-          ═══════════════════════════════════════════════════════════════════ */}
-      <Card className="overflow-hidden">
-        <CardHeader>
-          <CardTitle>Feature comparison</CardTitle>
-          <CardDescription>Premium positioning, transparent scope.</CardDescription>
-        </CardHeader>
+      {/* Feature Comparison Table */}
+      <div className="p-6 rounded-xl backdrop-blur-sm bg-white/10 border border-white/15 overflow-hidden">
+        <div className="space-y-1 mb-6">
+          <h3 className="text-lg font-semibold text-white">Feature comparison</h3>
+          <p className="text-sm text-white/60">Premium positioning, transparent scope.</p>
+        </div>
         
         <div className="overflow-x-auto -mx-6 px-6">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gold/20">
-                <th className="py-4 pr-6 text-left text-[10px] uppercase tracking-[0.2em] text-gold font-semibold">
+              <tr className="border-b border-white/20">
+                <th className="py-4 pr-6 text-left text-[10px] uppercase tracking-[0.2em] text-amber-300 font-semibold">
                   Feature
                 </th>
                 {allTiers.map((tier) => (
                   <th key={tier.id} className="py-4 pr-6 text-left">
-                    <span className="block text-[10px] uppercase tracking-[0.2em] text-gold font-semibold">
+                    <span className="block text-[10px] uppercase tracking-[0.2em] text-amber-300 font-semibold">
                       {tier.name}
                     </span>
-                    <span className="block mt-1 text-xs text-ink-soft/60 dark:text-parchment-dark/50">
+                    <span className="block mt-1 text-xs text-white/50">
                       ${tier.priceUSD}
                     </span>
                   </th>
@@ -276,12 +265,12 @@ export default function PricingClient({
               </tr>
             </thead>
             <tbody>
-              {comparisonRows.map((row, rowIndex) => (
+              {comparisonRows.map((row) => (
                 <tr 
                   key={row.label} 
-                  className="border-b border-gold/10 hover:bg-gold/[0.02] transition-colors duration-150"
+                  className="border-b border-white/10 hover:bg-white/5 transition-colors duration-150"
                 >
-                  <td className="py-4 pr-6 font-medium text-ink dark:text-cream text-sm">
+                  <td className="py-4 pr-6 font-medium text-white text-sm">
                     {row.label}
                   </td>
                   {allTiers.map((tier) => {
@@ -294,10 +283,10 @@ export default function PricingClient({
                         key={tier.id} 
                         className={`py-4 pr-6 text-sm ${
                           isPositive 
-                            ? 'text-sage font-medium' 
+                            ? 'text-green-400 font-medium' 
                             : isNegative 
-                              ? 'text-ink-soft/40 dark:text-parchment-dark/30' 
-                              : 'text-ink-soft dark:text-parchment-dark'
+                              ? 'text-white/30' 
+                              : 'text-white/70'
                         }`}
                       >
                         {value}
@@ -309,36 +298,29 @@ export default function PricingClient({
             </tbody>
           </table>
         </div>
-      </Card>
+      </div>
 
-      {/* ═══════════════════════════════════════════════════════════════════
-          Executive QA Section
-          ═══════════════════════════════════════════════════════════════════ */}
-      <CardPremium className="relative overflow-hidden">
-        {/* Background glow */}
-        <div className="absolute -top-20 -right-20 w-64 h-64 bg-gradient-radial from-gold/10 to-transparent rounded-full blur-2xl" />
+      {/* Executive QA Section */}
+      <div className="p-8 rounded-xl backdrop-blur-sm bg-white/10 border border-amber-300/30 relative overflow-hidden">
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400" />
         
         <div className="relative">
-          <CardHeader>
-            <Badge variant="premium" className="w-fit mb-2">Premium</Badge>
-            <CardTitle>AI-powered. Executive audited.</CardTitle>
-          </CardHeader>
-          <p className="text-sm text-ink-soft/80 dark:text-parchment-dark/70 leading-relaxed max-w-3xl">
+          <Badge variant="gold" className="mb-4">Premium</Badge>
+          <h3 className="text-xl font-semibold text-white mb-3">AI-powered. Executive audited.</h3>
+          <p className="text-sm text-white/70 leading-relaxed max-w-3xl">
             Every deliverable is generated by our sourcing and scoring engine (Fit + Ghost scoring).
             For premium tiers, a seasoned executive with 15+ years of experience audits your outputs
             to ensure accuracy, relevance, and professionalism before delivery.
           </p>
         </div>
-      </CardPremium>
+      </div>
 
-      {/* ═══════════════════════════════════════════════════════════════════
-          FAQ Section
-          ═══════════════════════════════════════════════════════════════════ */}
-      <Card>
-        <CardHeader>
-          <CardTitle>FAQ</CardTitle>
-          <CardDescription>Short answers for busy buyers.</CardDescription>
-        </CardHeader>
+      {/* FAQ Section */}
+      <div className="p-6 rounded-xl backdrop-blur-sm bg-white/10 border border-white/15">
+        <div className="space-y-1 mb-6">
+          <h3 className="text-lg font-semibold text-white">FAQ</h3>
+          <p className="text-sm text-white/60">Short answers for busy buyers.</p>
+        </div>
         
         <div className="space-y-6 text-sm">
           {[
@@ -362,21 +344,21 @@ export default function PricingClient({
               q: "Refunds?",
               a: "If we cannot source real roles that match your constraints, we refund."
             }
-          ].map((item, index) => (
+          ].map((item) => (
             <div 
               key={item.q} 
-              className="group pb-6 border-b border-gold/10 last:border-0 last:pb-0"
+              className="group pb-6 border-b border-white/10 last:border-0 last:pb-0"
             >
-              <p className="font-semibold text-ink dark:text-cream group-hover:text-gold-dark dark:group-hover:text-gold transition-colors duration-200">
+              <p className="font-semibold text-white group-hover:text-amber-200 transition-colors duration-200">
                 {item.q}
               </p>
-              <p className="mt-2 text-ink-soft/80 dark:text-parchment-dark/70 leading-relaxed">
+              <p className="mt-2 text-white/70 leading-relaxed">
                 {item.a}
               </p>
             </div>
           ))}
         </div>
-      </Card>
+      </div>
     </section>
   );
 }

@@ -2,9 +2,6 @@
 
 import { useMemo, useRef, useState } from "react";
 import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
-import { Textarea } from "../../components/ui/textarea";
-import { Card, CardPremium } from "../../components/ui/card";
 
 const defaultState = {
   full_name: "",
@@ -29,6 +26,73 @@ type Props = {
   devMode: boolean;
   isAllowed: boolean;
 };
+
+/* Glass card component */
+function GlassCard({ 
+  children, 
+  className = ""
+}: { 
+  children: React.ReactNode; 
+  className?: string;
+}) {
+  return (
+    <div className={`p-8 rounded-xl backdrop-blur-sm bg-white/10 border border-white/15 ${className}`}>
+      {children}
+    </div>
+  );
+}
+
+/* Glass input component */
+function GlassInput({ 
+  type = "text",
+  placeholder,
+  value,
+  onChange,
+  disabled
+}: {
+  type?: string;
+  placeholder?: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  disabled?: boolean;
+}) {
+  return (
+    <input
+      type={type}
+      placeholder={placeholder}
+      value={value}
+      onChange={onChange}
+      disabled={disabled}
+      className="w-full h-11 rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm px-4 text-sm text-white placeholder:text-white/40 focus:border-amber-300/40 focus:outline-none focus:ring-2 focus:ring-amber-300/10 transition-all duration-200 disabled:opacity-50"
+    />
+  );
+}
+
+/* Glass textarea component */
+function GlassTextarea({ 
+  placeholder,
+  value,
+  onChange,
+  disabled,
+  rows = 4
+}: {
+  placeholder?: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  disabled?: boolean;
+  rows?: number;
+}) {
+  return (
+    <textarea
+      placeholder={placeholder}
+      value={value}
+      onChange={onChange}
+      disabled={disabled}
+      rows={rows}
+      className="w-full rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm px-4 py-3 text-sm text-white placeholder:text-white/40 focus:border-amber-300/40 focus:outline-none focus:ring-2 focus:ring-amber-300/10 transition-all duration-200 disabled:opacity-50 resize-none"
+    />
+  );
+}
 
 export default function IntakeForm({ sessionId, tier, devMode, isAllowed }: Props) {
   const [form, setForm] = useState(defaultState);
@@ -118,18 +182,18 @@ export default function IntakeForm({ sessionId, tier, devMode, isAllowed }: Prop
   const isDisabled = !isAllowed || status === "submitting";
 
   return (
-    <CardPremium className="space-y-8 animate-fade-in-up">
+    <GlassCard className="space-y-8 animate-fade-in-up">
       {devMode ? (
-        <div className="flex items-center gap-3 rounded-xl border border-gold/30 bg-gradient-to-r from-gold/10 to-amber/5 p-4 text-xs">
-          <span className="h-2 w-2 rounded-full bg-gold animate-pulse" />
-          <span className="text-gold-dark dark:text-gold">DEV MODE active. Intake will create a draft order without Stripe.</span>
+        <div className="flex items-center gap-3 rounded-xl border border-amber-300/30 bg-amber-300/10 p-4 text-xs">
+          <span className="h-2 w-2 rounded-full bg-amber-300 animate-pulse" />
+          <span className="text-amber-200">DEV MODE active. Intake will create a draft order without Stripe.</span>
         </div>
       ) : null}
 
       {/* Privacy notice */}
-      <div className="rounded-xl border border-gold/20 bg-gradient-to-r from-cream/60 to-parchment/40 p-4 text-xs text-ink-soft/70 dark:from-navy/60 dark:to-navy-deep/40 dark:text-parchment-dark/60">
+      <div className="rounded-xl border border-white/10 bg-white/5 p-4 text-xs text-white/60">
         <div className="flex items-center gap-2">
-          <span className="h-1.5 w-1.5 rounded-full bg-sage" />
+          <span className="h-1.5 w-1.5 rounded-full bg-green-400" />
           <span>Private. Stored securely. Not shared.</span>
         </div>
       </div>
@@ -144,18 +208,18 @@ export default function IntakeForm({ sessionId, tier, devMode, isAllowed }: Prop
               <span
                 className={`h-2.5 w-2.5 rounded-full transition-all duration-300 ${
                   isActive 
-                    ? "bg-gradient-to-br from-gold to-gold-dark shadow-glow" 
+                    ? "bg-gradient-to-br from-amber-300 to-amber-500 shadow-glow" 
                     : isComplete 
-                      ? "bg-sage" 
-                      : "bg-mist dark:bg-navy-deep"
+                      ? "bg-green-400" 
+                      : "bg-white/20"
                 }`}
               />
               <span className={`transition-colors duration-200 ${
                 isActive 
-                  ? "text-gold font-semibold" 
+                  ? "text-amber-300 font-semibold" 
                   : isComplete 
-                    ? "text-sage" 
-                    : "text-ink-soft/50 dark:text-parchment-dark/40"
+                    ? "text-green-400" 
+                    : "text-white/40"
               }`}>
                 {label}
               </span>
@@ -167,32 +231,32 @@ export default function IntakeForm({ sessionId, tier, devMode, isAllowed }: Prop
       {/* Step 1: Basics */}
       {step === 1 ? (
         <div className="space-y-5">
-          <p className="text-[10px] uppercase tracking-[0.3em] text-gold font-medium">Basic Information</p>
+          <p className="text-[10px] uppercase tracking-[0.3em] text-amber-300 font-medium">Basic Information</p>
           <div className="grid gap-5 md:grid-cols-2">
             <div className="space-y-2">
-              <label className="text-xs text-ink-soft/70 dark:text-parchment-dark/60">Full name *</label>
-              <Input
+              <label className="text-xs text-white/60">Full name *</label>
+              <GlassInput
                 placeholder="John Smith"
                 value={form.full_name}
                 onChange={(event) => update("full_name", event.target.value)}
                 disabled={isDisabled}
               />
-              {errors.full_name ? <p className="text-xs text-terracotta">{errors.full_name}</p> : null}
+              {errors.full_name ? <p className="text-xs text-red-400">{errors.full_name}</p> : null}
             </div>
             <div className="space-y-2">
-              <label className="text-xs text-ink-soft/70 dark:text-parchment-dark/60">Email *</label>
-              <Input
+              <label className="text-xs text-white/60">Email *</label>
+              <GlassInput
                 type="email"
                 placeholder="john@company.com"
                 value={form.email}
                 onChange={(event) => update("email", event.target.value)}
                 disabled={isDisabled}
               />
-              {errors.email ? <p className="text-xs text-terracotta">{errors.email}</p> : null}
+              {errors.email ? <p className="text-xs text-red-400">{errors.email}</p> : null}
             </div>
             <div className="space-y-2">
-              <label className="text-xs text-ink-soft/70 dark:text-parchment-dark/60">LinkedIn URL</label>
-              <Input
+              <label className="text-xs text-white/60">LinkedIn URL</label>
+              <GlassInput
                 placeholder="linkedin.com/in/yourprofile"
                 value={form.linkedin_url}
                 onChange={(event) => update("linkedin_url", event.target.value)}
@@ -200,8 +264,8 @@ export default function IntakeForm({ sessionId, tier, devMode, isAllowed }: Prop
               />
             </div>
             <div className="space-y-2">
-              <label className="text-xs text-ink-soft/70 dark:text-parchment-dark/60">Seniority level</label>
-              <Input
+              <label className="text-xs text-white/60">Seniority level</label>
+              <GlassInput
                 placeholder="IC / Manager / Director"
                 value={form.seniority}
                 onChange={(event) => update("seniority", event.target.value)}
@@ -215,23 +279,23 @@ export default function IntakeForm({ sessionId, tier, devMode, isAllowed }: Prop
       {/* Step 2: Preferences */}
       {step === 2 ? (
         <div className="space-y-5">
-          <p className="text-[10px] uppercase tracking-[0.3em] text-gold font-medium">Job Preferences</p>
+          <p className="text-[10px] uppercase tracking-[0.3em] text-amber-300 font-medium">Job Preferences</p>
           <div className="grid gap-5 md:grid-cols-2">
             <div className="space-y-2">
-              <label className="text-xs text-ink-soft/70 dark:text-parchment-dark/60">Target titles *</label>
-              <Input
+              <label className="text-xs text-white/60">Target titles *</label>
+              <GlassInput
                 placeholder="Product Manager, Senior PM"
                 value={form.target_titles}
                 onChange={(event) => update("target_titles", event.target.value)}
                 disabled={isDisabled}
               />
               {errors.target_titles ? (
-                <p className="text-xs text-terracotta">{errors.target_titles}</p>
+                <p className="text-xs text-red-400">{errors.target_titles}</p>
               ) : null}
             </div>
             <div className="space-y-2">
-              <label className="text-xs text-ink-soft/70 dark:text-parchment-dark/60">Salary minimum</label>
-              <Input
+              <label className="text-xs text-white/60">Salary minimum</label>
+              <GlassInput
                 placeholder="$150,000"
                 value={form.salary_min}
                 onChange={(event) => update("salary_min", event.target.value)}
@@ -239,8 +303,8 @@ export default function IntakeForm({ sessionId, tier, devMode, isAllowed }: Prop
               />
             </div>
             <div className="space-y-2">
-              <label className="text-xs text-ink-soft/70 dark:text-parchment-dark/60">Industries prefer</label>
-              <Input
+              <label className="text-xs text-white/60">Industries prefer</label>
+              <GlassInput
                 placeholder="SaaS, Fintech, Healthcare"
                 value={form.industries_prefer}
                 onChange={(event) => update("industries_prefer", event.target.value)}
@@ -248,8 +312,8 @@ export default function IntakeForm({ sessionId, tier, devMode, isAllowed }: Prop
               />
             </div>
             <div className="space-y-2">
-              <label className="text-xs text-ink-soft/70 dark:text-parchment-dark/60">Industries avoid</label>
-              <Input
+              <label className="text-xs text-white/60">Industries avoid</label>
+              <GlassInput
                 placeholder="Crypto, Gambling"
                 value={form.industries_avoid}
                 onChange={(event) => update("industries_avoid", event.target.value)}
@@ -258,7 +322,7 @@ export default function IntakeForm({ sessionId, tier, devMode, isAllowed }: Prop
             </div>
           </div>
           
-          <div className="flex flex-wrap gap-6 pt-4 border-t border-gold/10">
+          <div className="flex flex-wrap gap-6 pt-4 border-t border-white/10">
             <label className="group flex items-center gap-3 cursor-pointer">
               <div className="relative">
                 <input
@@ -268,12 +332,12 @@ export default function IntakeForm({ sessionId, tier, devMode, isAllowed }: Prop
                   disabled={isDisabled}
                   className="peer sr-only"
                 />
-                <div className="h-5 w-5 rounded-md border border-gold/30 bg-gradient-to-br from-cream/80 to-parchment/60 peer-checked:bg-gradient-to-br peer-checked:from-gold peer-checked:to-gold-dark peer-checked:border-gold transition-all duration-200 dark:from-navy/80 dark:to-navy-deep/60" />
+                <div className="h-5 w-5 rounded-md border border-white/30 bg-white/10 peer-checked:bg-gradient-to-br peer-checked:from-amber-300 peer-checked:to-amber-500 peer-checked:border-amber-300 transition-all duration-200" />
                 <svg className="absolute top-0.5 left-0.5 h-4 w-4 text-white opacity-0 peer-checked:opacity-100 transition-opacity duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <span className="text-sm text-ink-soft dark:text-parchment-dark group-hover:text-ink dark:group-hover:text-cream transition-colors duration-200">
+              <span className="text-sm text-white/70 group-hover:text-white transition-colors duration-200">
                 Remote only
               </span>
             </label>
@@ -287,12 +351,12 @@ export default function IntakeForm({ sessionId, tier, devMode, isAllowed }: Prop
                   disabled={isDisabled}
                   className="peer sr-only"
                 />
-                <div className="h-5 w-5 rounded-md border border-gold/30 bg-gradient-to-br from-cream/80 to-parchment/60 peer-checked:bg-gradient-to-br peer-checked:from-gold peer-checked:to-gold-dark peer-checked:border-gold transition-all duration-200 dark:from-navy/80 dark:to-navy-deep/60" />
+                <div className="h-5 w-5 rounded-md border border-white/30 bg-white/10 peer-checked:bg-gradient-to-br peer-checked:from-amber-300 peer-checked:to-amber-500 peer-checked:border-amber-300 transition-all duration-200" />
                 <svg className="absolute top-0.5 left-0.5 h-4 w-4 text-white opacity-0 peer-checked:opacity-100 transition-opacity duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <span className="text-sm text-ink-soft dark:text-parchment-dark group-hover:text-ink dark:group-hover:text-cream transition-colors duration-200">
+              <span className="text-sm text-white/70 group-hover:text-white transition-colors duration-200">
                 Contract ok
               </span>
             </label>
@@ -303,11 +367,11 @@ export default function IntakeForm({ sessionId, tier, devMode, isAllowed }: Prop
       {/* Step 3: Upload */}
       {step === 3 ? (
         <div className="space-y-5">
-          <p className="text-[10px] uppercase tracking-[0.3em] text-gold font-medium">Target Job & Resume</p>
+          <p className="text-[10px] uppercase tracking-[0.3em] text-amber-300 font-medium">Target Job & Resume</p>
           
           <div className="space-y-2">
-            <label className="text-xs text-ink-soft/70 dark:text-parchment-dark/60">Target job URL</label>
-            <Input
+            <label className="text-xs text-white/60">Target job URL</label>
+            <GlassInput
               placeholder="https://jobs.lever.co/company/role"
               value={form.target_job_url}
               onChange={(event) => update("target_job_url", event.target.value)}
@@ -316,8 +380,8 @@ export default function IntakeForm({ sessionId, tier, devMode, isAllowed }: Prop
           </div>
           
           <div className="space-y-2">
-            <label className="text-xs text-ink-soft/70 dark:text-parchment-dark/60">Target job description</label>
-            <Textarea
+            <label className="text-xs text-white/60">Target job description</label>
+            <GlassTextarea
               placeholder="Paste the full job description here..."
               value={form.target_jd}
               onChange={(event) => update("target_jd", event.target.value)}
@@ -332,15 +396,15 @@ export default function IntakeForm({ sessionId, tier, devMode, isAllowed }: Prop
             onDrop={onDrop}
             className={`group relative flex flex-col items-center justify-center gap-4 rounded-2xl border-2 border-dashed p-8 transition-all duration-300 ${
               resumeFile 
-                ? "border-sage/50 bg-gradient-to-br from-sage/10 to-sage/5" 
-                : "border-gold/30 bg-gradient-to-br from-cream/60 to-parchment/40 hover:border-gold/50 hover:bg-gradient-to-br hover:from-gold/10 hover:to-amber/5 dark:from-navy/60 dark:to-navy-deep/40"
+                ? "border-green-400/50 bg-green-500/10" 
+                : "border-white/30 bg-white/5 hover:border-amber-300/50 hover:bg-amber-300/10"
             }`}
           >
             {/* Upload icon */}
             <div className={`flex h-14 w-14 items-center justify-center rounded-xl transition-all duration-300 ${
               resumeFile 
-                ? "bg-sage/20 text-sage" 
-                : "bg-gold/10 text-gold group-hover:bg-gold/20"
+                ? "bg-green-500/20 text-green-400" 
+                : "bg-white/10 text-amber-300 group-hover:bg-amber-300/20"
             }`}>
               {resumeFile ? (
                 <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -354,22 +418,22 @@ export default function IntakeForm({ sessionId, tier, devMode, isAllowed }: Prop
             </div>
             
             <div className="text-center">
-              <p className="text-sm text-ink-soft dark:text-parchment-dark">
+              <p className="text-sm text-white/70">
                 {resumeFile ? (
-                  <span className="font-medium text-sage">Selected: {resumeFile.name}</span>
+                  <span className="font-medium text-green-400">Selected: {resumeFile.name}</span>
                 ) : (
                   "Drag & drop your resume (PDF/DOCX)"
                 )}
               </p>
               {!resumeFile && (
-                <p className="mt-1 text-xs text-ink-soft/60 dark:text-parchment-dark/50">or click to browse</p>
+                <p className="mt-1 text-xs text-white/50">or click to browse</p>
               )}
             </div>
             
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="rounded-full border border-gold/30 bg-gradient-to-r from-cream/80 to-parchment/60 px-5 py-2 text-xs font-semibold uppercase tracking-wider text-gold hover:border-gold/50 hover:shadow-soft transition-all duration-200 dark:from-navy/80 dark:to-navy-deep/60"
+              className="rounded-full border border-amber-300/30 bg-amber-300/10 px-5 py-2 text-xs font-semibold uppercase tracking-wider text-amber-200 hover:border-amber-300/50 hover:bg-amber-300/20 transition-all duration-200"
             >
               {resumeFile ? "Change file" : "Browse file"}
             </button>
@@ -383,14 +447,14 @@ export default function IntakeForm({ sessionId, tier, devMode, isAllowed }: Prop
               disabled={isDisabled}
             />
             
-            {errors.resume ? <p className="text-xs text-terracotta">{errors.resume}</p> : null}
+            {errors.resume ? <p className="text-xs text-red-400">{errors.resume}</p> : null}
           </div>
         </div>
       ) : null}
 
       {/* Navigation buttons */}
-      <div className="flex items-center justify-between pt-6 border-t border-gold/10">
-        <Button variant="ghost" onClick={back} disabled={step === 1 || isDisabled}>
+      <div className="flex items-center justify-between pt-6 border-t border-white/10">
+        <Button variant="ghost" className="text-white/70 hover:text-white hover:bg-white/10" onClick={back} disabled={step === 1 || isDisabled}>
           ← Back
         </Button>
         {step < 3 ? (
@@ -413,20 +477,20 @@ export default function IntakeForm({ sessionId, tier, devMode, isAllowed }: Prop
 
       {/* Status messages */}
       {status === "success" ? (
-        <div className="flex items-center gap-3 rounded-xl border border-sage/30 bg-gradient-to-r from-sage/10 to-sage/5 p-4">
-          <span className="h-2 w-2 rounded-full bg-sage animate-pulse" />
-          <p className="text-sm text-sage font-medium">
+        <div className="flex items-center gap-3 rounded-xl border border-green-400/30 bg-green-500/10 p-4">
+          <span className="h-2 w-2 rounded-full bg-green-400 animate-pulse" />
+          <p className="text-sm text-green-300 font-medium">
             Intake submitted. We are processing your report now.
           </p>
         </div>
       ) : null}
       
       {status === "error" ? (
-        <div className="flex items-center gap-3 rounded-xl border border-terracotta/30 bg-gradient-to-r from-terracotta/10 to-terracotta/5 p-4">
-          <span className="h-2 w-2 rounded-full bg-terracotta" />
-          <p className="text-sm text-terracotta">{message}</p>
+        <div className="flex items-center gap-3 rounded-xl border border-red-400/30 bg-red-500/10 p-4">
+          <span className="h-2 w-2 rounded-full bg-red-400" />
+          <p className="text-sm text-red-300">{message}</p>
         </div>
       ) : null}
-    </CardPremium>
+    </GlassCard>
   );
 }
