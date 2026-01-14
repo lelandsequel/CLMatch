@@ -185,9 +185,9 @@ export const tiers: Tier[] = [
       priorityTurnaround: false,
       includesSecondRevision: false
     },
-    shipsAutomatically: true,
-    requiresHumanQA: false,
-    qcStrictness: "standard",
+    shipsAutomatically: false,
+    requiresHumanQA: true,
+    qcStrictness: "high",
     delivery: "24-48h",
     includesPivotPathways: true
   },

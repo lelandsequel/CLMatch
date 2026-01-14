@@ -100,6 +100,10 @@ curl -X POST http://localhost:3000/api/intake/submit \
 ## Stripe Price IDs
 - Create one Price per tier in Stripe.
 - Paste each Price ID into the matching `STRIPE_PRICE_*` env var.
+- Create products + prices (idempotent):
+```
+STRIPE_SECRET_KEY=... npm run stripe:create-tiers
+```
 
 ## Admin
 - `/admin` is gated by `ADMIN_EMAILS` or `ADMIN_BYPASS=true`.
