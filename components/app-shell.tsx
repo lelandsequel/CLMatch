@@ -6,37 +6,105 @@ import { UserNav } from "./auth/UserNav";
 
 export function AppShell({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-cloud via-white to-slate-100 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900">
-      <header className="border-b border-mist/70 dark:border-slate-800">
-        <div className="container flex flex-wrap items-center justify-between gap-4 py-6">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-midnight text-white">C</div>
-            <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-slate-500">C&amp;L Job Match</p>
-              <p className="text-lg font-semibold">Offer Farming Report</p>
-            </div>
-          </Link>
-          <nav className="flex items-center gap-4 text-sm">
-            <Link href="/pricing" className="text-slate-600 hover:text-ink dark:text-slate-300">
-              Pricing
+    <div className="relative min-h-screen overflow-hidden">
+      {/* Warm gradient background */}
+      <div className="fixed inset-0 bg-gradient-to-br from-parchment via-cream to-parchment-warm dark:from-navy-deep dark:via-navy dark:to-ink" />
+      
+      {/* Decorative light beams - Rembrandt-style chiaroscuro */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        {/* Top-left golden light */}
+        <div className="absolute -top-1/4 -left-1/4 w-[800px] h-[800px] bg-gradient-radial from-gold/8 via-gold/3 to-transparent rounded-full blur-3xl" />
+        {/* Bottom-right warm glow */}
+        <div className="absolute -bottom-1/4 -right-1/4 w-[600px] h-[600px] bg-gradient-radial from-amber/6 via-amber/2 to-transparent rounded-full blur-3xl" />
+        {/* Center subtle warmth */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[600px] bg-gradient-radial from-cream/40 via-transparent to-transparent rounded-full blur-3xl dark:from-gold/5" />
+      </div>
+      
+      {/* Subtle texture overlay */}
+      <div 
+        className="fixed inset-0 opacity-[0.015] pointer-events-none mix-blend-overlay"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`
+        }}
+      />
+      
+      {/* Vignette effect */}
+      <div className="fixed inset-0 bg-gradient-radial from-transparent via-transparent to-ink/5 pointer-events-none dark:to-ink/30" />
+      
+      {/* Content wrapper */}
+      <div className="relative z-10">
+        <header className="relative border-b border-gold/10 backdrop-blur-md bg-cream/60 dark:bg-navy/60 dark:border-gold/5">
+          {/* Header glow line */}
+          <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gold/30 to-transparent" />
+          
+          <div className="container flex flex-wrap items-center justify-between gap-4 py-6">
+            <Link href="/" className="group flex items-center gap-3">
+              {/* Logo with premium styling */}
+              <div className="relative flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-ink to-ink-soft text-cream shadow-button group-hover:shadow-glow transition-all duration-300">
+                <span className="text-lg font-bold tracking-tight">C</span>
+                {/* Subtle shine effect */}
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              </div>
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.3em] text-gold font-medium">C&amp;L Job Match</p>
+                <p className="text-lg font-semibold text-ink dark:text-cream tracking-tight">Offer Farming Report</p>
+              </div>
             </Link>
-            <ThemeToggle />
-            <AuthProvider>
-              <UserNav />
-            </AuthProvider>
-          </nav>
-        </div>
-      </header>
-      <main>{children}</main>
-      <footer className="border-t border-mist/70 py-10 text-sm text-slate-500 dark:border-slate-800">
-        <div className="container flex flex-wrap items-center justify-between gap-4">
-          <p>© {new Date().getFullYear()} C&L Job Match. Premium sourcing, anti-ghost intelligence.</p>
-          <div className="flex gap-4">
-            <Link href="/pricing">Pricing</Link>
-            <a href="mailto:hello@cljobmatch.com">hello@cljobmatch.com</a>
+            <nav className="flex items-center gap-5 text-sm">
+              <Link 
+                href="/pricing" 
+                className="relative text-ink-soft hover:text-ink dark:text-parchment-dark dark:hover:text-cream transition-colors duration-200 font-medium group"
+              >
+                Pricing
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gold group-hover:w-full transition-all duration-300" />
+              </Link>
+              <ThemeToggle />
+              <AuthProvider>
+                <UserNav />
+              </AuthProvider>
+            </nav>
           </div>
-        </div>
-      </footer>
+        </header>
+        
+        <main className="relative">
+          {children}
+        </main>
+        
+        <footer className="relative border-t border-gold/10 py-12 backdrop-blur-md bg-parchment-warm/60 dark:bg-navy-deep/60 dark:border-gold/5">
+          {/* Footer glow line */}
+          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gold/20 to-transparent" />
+          
+          <div className="container">
+            <div className="flex flex-wrap items-center justify-between gap-6">
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-ink dark:text-cream">
+                  © {new Date().getFullYear()} C&L Job Match
+                </p>
+                <p className="text-xs text-ink-soft/70 dark:text-parchment-dark/50">
+                  Premium sourcing, anti-ghost intelligence.
+                </p>
+              </div>
+              <div className="flex gap-6 text-sm">
+                <Link 
+                  href="/pricing" 
+                  className="text-ink-soft hover:text-gold transition-colors duration-200"
+                >
+                  Pricing
+                </Link>
+                <a 
+                  href="mailto:hello@cljobmatch.com" 
+                  className="text-ink-soft hover:text-gold transition-colors duration-200"
+                >
+                  hello@cljobmatch.com
+                </a>
+              </div>
+            </div>
+            
+            {/* Decorative brush stroke */}
+            <div className="mt-8 h-px bg-gradient-to-r from-transparent via-gold/20 to-transparent" />
+          </div>
+        </footer>
+      </div>
     </div>
   );
 }

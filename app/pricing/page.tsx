@@ -24,16 +24,20 @@ export default function PricingPage() {
 
   return (
     <AppShell>
-      <Section className="py-16 md:py-24">
-        <div className="max-w-2xl space-y-4">
-          <Badge>Pricing</Badge>
+      <Section className="relative py-20 md:py-28 overflow-hidden">
+        {/* Decorative background elements */}
+        <div className="absolute -top-40 -right-40 w-[600px] h-[600px] bg-gradient-radial from-gold/8 via-gold/3 to-transparent rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-20 -left-20 w-[400px] h-[400px] bg-gradient-radial from-amber/6 via-transparent to-transparent rounded-full blur-3xl pointer-events-none" />
+        
+        <div className="relative max-w-2xl space-y-5">
+          <Badge variant="gold" className="animate-pulse-glow">Pricing</Badge>
           <PageHeader
             title="Choose your offer engine."
             subtitle="Real jobs only. Anti-ghost scoring. ATS-ready assets. Delivered fast."
           />
         </div>
 
-        <p className="mt-4 text-sm text-slate-500">
+        <p className="relative mt-6 text-sm text-ink-soft/70 dark:text-parchment-dark/60 max-w-2xl leading-relaxed">
           Turnaround depends on intake quality and role volume. We only source from ATS systems
           (Greenhouse/Lever/Ashby/Workday). No scraped aggregator spam.
         </p>
