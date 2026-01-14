@@ -23,8 +23,14 @@ function AuthCallbackContent() {
 
       const code = searchParams.get("code");
       const tokenHash = searchParams.get("token_hash");
+      const errorParam = searchParams.get("error_description") || searchParams.get("error");
       const type = searchParams.get("type") || "magiclink";
       const nextPath = searchParams.get("next") || "/dashboard";
+
+      if (errorParam) {
+        setMessage(errorParam);
+        return;
+      }
 
       if (code) {
         const { error } = await supabase.auth.exchangeCodeForSession(code);
@@ -46,6 +52,31 @@ function AuthCallbackContent() {
         }
         router.replace(nextPath);
         return;
+      }
+
+      if (typeof window !== "undefined" && window.location.hash) {
+        const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+        const accessToken = hashParams.get("access_token");
+        const refreshToken = hashParams.get("refresh_token");
+        const hashError = hashParams.get("error_description") || hashParams.get("error");
+
+        if (hashError) {
+          setMessage(hashError);
+          return;
+        }
+
+        if (accessToken && refreshToken) {
+          const { error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken
+          });
+          if (error) {
+            setMessage(error.message);
+            return;
+          }
+          router.replace(nextPath);
+          return;
+        }
       }
 
       setMessage("Missing auth code.");
