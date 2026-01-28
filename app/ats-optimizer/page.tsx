@@ -17,6 +17,7 @@ import {
   PDFDownloadButton,
   type ResumeTemplate,
 } from "../../components/ats";
+import { PolicyNote } from "../../components/policy-note";
 
 function ATSOptimizerContent() {
   const searchParams = useSearchParams();
@@ -353,6 +354,9 @@ function ATSOptimizerContent() {
 
           {/* Testimonials */}
           <Testimonials />
+          
+          {/* Policy Note */}
+          <PolicyNote className="mb-12" />
 
           {/* Monthly Plan CTA */}
           <Card className="p-8 text-center bg-gradient-to-br from-gold/10 via-amber/5 to-gold/10 border-gold/30 mb-12">

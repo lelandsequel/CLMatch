@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button } from "../../components/ui/button";
 import { Badge } from "../../components/ui/badge";
+import { PolicyNoteLight } from "../../components/policy-note";
 import type { Tier } from "../../lib/pricing";
 import { tierSortOrder } from "../../lib/pricing";
 
@@ -342,7 +343,7 @@ export default function PricingClient({
             },
             {
               q: "Refunds?",
-              a: "If we cannot source real roles that match your constraints, we refund."
+              a: "No refunds. For packages $199+, we provide free optimized resumes until you land a job."
             }
           ].map((item) => (
             <div 
@@ -359,6 +360,9 @@ export default function PricingClient({
           ))}
         </div>
       </div>
+
+      {/* Policy Note */}
+      <PolicyNoteLight className="mt-12" />
     </section>
   );
 }

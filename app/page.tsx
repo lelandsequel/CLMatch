@@ -4,6 +4,7 @@ import { Section } from "../components/section";
 import { PageHeader } from "../components/page-header";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
+import { PolicyNoteLight } from "../components/policy-note";
 import { sampleReport } from "../lib/sampleReport";
 
 export default function HomePage() {
@@ -391,7 +392,7 @@ export default function HomePage() {
             },
             {
               q: "Do you offer refunds?",
-              a: "We don't offer refunds. However — we do guarantee delivery. If we don't source real roles that match your constraints (remote-only, seniority, salary floor, titles, etc.), we will re-run the sourcing and scoring pipeline until we do."
+              a: "No refunds. For packages $199+, we provide free optimized resumes until you land a job."
             },
             {
               q: "Is AI generating everything?",
@@ -408,6 +409,11 @@ export default function HomePage() {
             </div>
           ))}
         </div>
+      </Section>
+
+      {/* Policy Note */}
+      <Section className="py-4">
+        <PolicyNoteLight />
       </Section>
 
       {/* Footer */}
