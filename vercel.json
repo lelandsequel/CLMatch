@@ -1,0 +1,13 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/process-pending",
+      "schedule": "* * * * *"
+    }
+  ],
+  "functions": {
+    "app/api/cron/process-pending/route.ts": {
+      "maxDuration": 300
+    }
+  }
+}

@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
-import { createOrder, createIntake, findOrderBySession } from "../../../../lib/orders";
+import { createOrder, createIntake, findOrderBySession, updateOrderStatus } from "../../../../lib/orders";
 import { uploadBuffer } from "../../../../lib/storage";
-import { processOrder } from "../../../../lib/processing/processOrder";
 import { getTier } from "../../../../lib/pricing";
 
 export const runtime = "nodejs";
@@ -13,6 +12,18 @@ function parseCsv(value: string | null) {
     .filter(Boolean);
 }
 
+/**
+ * Intake submission endpoint.
+ * 
+ * This endpoint:
+ * 1. Validates the submission
+ * 2. Uploads the resume
+ * 3. Creates the intake record
+ * 4. Sets order status to "pending"
+ * 5. Returns immediately
+ * 
+ * Processing happens asynchronously via /api/cron/process-pending
+ */
 export async function POST(request: Request) {
   try {
     const formData = await request.formData();
@@ -49,12 +60,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
+    // Upload resume
     const arrayBuffer = await resumeFile.arrayBuffer();
-    const resumeBuffer = Buffer.from(arrayBuffer);
     const resumePath = `intakes/${order.id}/${resumeFile.name}`;
-
     await uploadBuffer("intakes", resumePath, arrayBuffer, resumeFile.type || "application/pdf");
 
+    // Build preferences
     const preferences = {
       remote_only: String(formData.get("remote_only")) === "true",
       contract_ok: String(formData.get("contract_ok")) === "true",
@@ -65,7 +76,8 @@ export async function POST(request: Request) {
       geo: ""
     };
 
-    const intake = await createIntake({
+    // Create intake record
+    await createIntake({
       order_id: order.id,
       resume_storage_path: resumePath,
       linkedin_url: String(formData.get("linkedin_url") ?? ""),
@@ -77,22 +89,19 @@ export async function POST(request: Request) {
       resume_profile_json: null
     });
 
-    await processOrder({
-      orderId: order.id,
-      intakeId: intake.id,
-      fullName,
-      email,
-      tierId: order.tier_id ?? tier.id,
-      resumeFileName: resumeFile.name,
-      resumeBuffer,
-      targetTitles: parseCsv(String(formData.get("target_titles") ?? "")),
-      preferences,
-      target_job_url: String(formData.get("target_job_url") ?? ""),
-      target_jd: String(formData.get("target_jd") ?? "")
-    });
+    // Set status to pending - processing will happen via cron
+    await updateOrderStatus(order.id, "pending");
 
-    return NextResponse.json({ success: true, order_id: order.id }, { status: 200 });
+    // Return immediately - user sees success, processing happens in background
+    return NextResponse.json({ 
+      success: true, 
+      order_id: order.id,
+      status: "pending",
+      message: "Your intake has been received. Processing will begin shortly."
+    }, { status: 200 });
+
   } catch (error) {
+    console.error("Intake submission error:", error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Unknown error" },
       { status: 500 }

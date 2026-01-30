@@ -97,10 +97,11 @@ function GlassTextarea({
 export default function IntakeForm({ sessionId, tier, devMode, isAllowed }: Props) {
   const [form, setForm] = useState(defaultState);
   const [resumeFile, setResumeFile] = useState<File | null>(null);
-  const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+  const [status, setStatus] = useState<"idle" | "submitting" | "pending" | "processing" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
   const [step, setStep] = useState<Step>(1);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [orderId, setOrderId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const update = (key: keyof typeof defaultState, value: string | boolean) => {
@@ -133,6 +134,46 @@ export default function IntakeForm({ sessionId, tier, devMode, isAllowed }: Prop
 
   const back = () => setStep((prev) => (prev > 1 ? ((prev - 1) as Step) : prev));
 
+  const pollOrderStatus = async (orderId: string) => {
+    const maxAttempts = 120; // 10 minutes max
+    let attempts = 0;
+    
+    while (attempts < maxAttempts) {
+      try {
+        const response = await fetch(`/api/orders/status?orderId=${orderId}`);
+        const data = await response.json();
+        
+        if (data.is_complete) {
+          setStatus("success");
+          setMessage("Your report is ready! Check your dashboard.");
+          return;
+        }
+        
+        if (data.is_error) {
+          setStatus("error");
+          setMessage(data.message || "Something went wrong. We'll reach out.");
+          return;
+        }
+        
+        // Update status message
+        setMessage(data.message || "Processing...");
+        if (data.status === "processing") {
+          setStatus("processing");
+        }
+        
+      } catch {
+        // Ignore polling errors, keep trying
+      }
+      
+      attempts++;
+      await new Promise(resolve => setTimeout(resolve, 5000)); // Poll every 5 seconds
+    }
+    
+    // Timeout - but order is still processing
+    setStatus("success");
+    setMessage("Your intake is being processed. We'll email you when ready.");
+  };
+
   const submit = async () => {
     if (!validateStep(3)) return;
     setStatus("submitting");
@@ -160,13 +201,24 @@ export default function IntakeForm({ sessionId, tier, devMode, isAllowed }: Prop
         method: "POST",
         body
       });
-      const data = (await response.json()) as { error?: string };
+      const data = (await response.json()) as { error?: string; order_id?: string; status?: string };
       if (!response.ok) {
         setStatus("error");
         setMessage(data.error ?? "Submission failed");
         return;
       }
-      setStatus("success");
+      
+      // Submission successful - now poll for processing status
+      if (data.order_id) {
+        setOrderId(data.order_id);
+        setStatus("pending");
+        setMessage("Intake received! Processing will begin shortly...");
+        pollOrderStatus(data.order_id);
+      } else {
+        setStatus("success");
+        setMessage("Intake submitted successfully.");
+      }
+      
     } catch (error) {
       setStatus("error");
       setMessage(error instanceof Error ? error.message : "Submission failed");
@@ -179,7 +231,7 @@ export default function IntakeForm({ sessionId, tier, devMode, isAllowed }: Prop
     if (file) setResumeFile(file);
   };
 
-  const isDisabled = !isAllowed || status === "submitting";
+  const isDisabled = !isAllowed || status === "submitting" || status === "pending" || status === "processing" || status === "success";
 
   return (
     <GlassCard className="space-y-8 animate-fade-in-up">
@@ -468,6 +520,16 @@ export default function IntakeForm({ sessionId, tier, devMode, isAllowed }: Prop
                 <span className="h-2 w-2 rounded-full bg-white animate-pulse" />
                 Submitting...
               </span>
+            ) : status === "pending" || status === "processing" ? (
+              <span className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-white animate-pulse" />
+                Processing...
+              </span>
+            ) : status === "success" ? (
+              <span className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-green-400" />
+                Complete
+              </span>
             ) : (
               "Submit intake"
             )}
@@ -476,11 +538,23 @@ export default function IntakeForm({ sessionId, tier, devMode, isAllowed }: Prop
       </div>
 
       {/* Status messages */}
+      {status === "pending" || status === "processing" ? (
+        <div className="flex items-center gap-3 rounded-xl border border-amber-400/30 bg-amber-500/10 p-4">
+          <span className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
+          <div>
+            <p className="text-sm text-amber-300 font-medium">
+              {status === "pending" ? "Queued" : "Processing"}
+            </p>
+            <p className="text-xs text-amber-200/70 mt-1">{message}</p>
+          </div>
+        </div>
+      ) : null}
+      
       {status === "success" ? (
         <div className="flex items-center gap-3 rounded-xl border border-green-400/30 bg-green-500/10 p-4">
           <span className="h-2 w-2 rounded-full bg-green-400 animate-pulse" />
           <p className="text-sm text-green-300 font-medium">
-            Intake submitted. We are processing your report now.
+            {message || "Your report is ready! Check your dashboard."}
           </p>
         </div>
       ) : null}

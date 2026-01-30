@@ -2,6 +2,7 @@ import { getServiceSupabase } from "./supabase/server";
 
 export type OrderStatus =
   | "draft"
+  | "pending"
   | "processing"
   | "qc_repairing"
   | "auto_qc_failed"
@@ -177,4 +178,30 @@ export async function listOrdersForEmail(email: string) {
     .order("created_at", { ascending: false });
   if (error) throw error;
   return data;
+}
+
+export async function findPendingOrders(limit = 5) {
+  const supabase = getServiceSupabase();
+  const { data, error } = await supabase
+    .from("orders")
+    .select("*, intakes(*)")
+    .eq("status", "pending")
+    .order("created_at", { ascending: true })
+    .limit(limit);
+  if (error) throw error;
+  return data;
+}
+
+export async function claimOrderForProcessing(orderId: string) {
+  const supabase = getServiceSupabase();
+  // Atomic update - only claim if still pending
+  const { data, error } = await supabase
+    .from("orders")
+    .update({ status: "processing" })
+    .eq("id", orderId)
+    .eq("status", "pending")
+    .select("*")
+    .maybeSingle();
+  if (error) throw error;
+  return data; // Returns null if already claimed by another worker
 }
