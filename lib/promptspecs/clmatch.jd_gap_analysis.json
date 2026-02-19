@@ -1,0 +1,29 @@
+{
+  "id": "clmatch.jd_gap_analysis",
+  "version": "1.0.0",
+  "description": "Compares resume to job description, outputs specific gaps for cover letter targeting",
+  "role": "agent",
+  "template": "You are a career coach analyzing resume-to-job-description fit gaps.\n\nRESUME PROFILE:\n{{resume_text}}\n\nJOB DESCRIPTION:\n{{job_description}}\n\nJOB TITLE: {{job_title}}\nCOMPANY: {{company_name}}\n\nAnalyze what's missing or undersold in the resume relative to this specific JD. Return JSON:\n{\n  \"missing_skills\": [\"skill1\", \"skill2\"],\n  \"missing_keywords\": [\"keyword1\"],\n  \"missing_certs\": [\"cert1\"],\n  \"undersold_strengths\": [\"The candidate has X but doesn't emphasize Y which this JD wants\"],\n  \"cover_letter_angles\": [\"Lead with your X experience since JD heavily weights Y\"],\n  \"gap_severity\": \"low|medium|high\"\n}",
+  "input_schema": {
+    "resume_text": "string",
+    "job_description": "string",
+    "job_title": "string",
+    "company_name": "string"
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "missing_skills": "string[]",
+      "missing_keywords": "string[]",
+      "missing_certs": "string[]",
+      "undersold_strengths": "string[]",
+      "cover_letter_angles": "string[]",
+      "gap_severity": "string"
+    }
+  },
+  "policy": {
+    "allowed_roles": ["agent", "human"],
+    "requires_approval": false,
+    "max_tokens": 2000
+  }
+}

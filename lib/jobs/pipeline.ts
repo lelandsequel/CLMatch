@@ -6,6 +6,7 @@ import { normalizeParsedJobs, detectAtsType } from "./normalize";
 import { scoreJob } from "./score";
 import { summarizeJob } from "./llm";
 import { createJobRun, saveJobs, saveJobSources, updateJobRun } from "./persist";
+import { augmentJobs } from "./rescore";
 
 function isRemoteJob(job: ParsedJob) {
   if (job.is_remote) return true;
@@ -100,7 +101,14 @@ export async function runJobPipeline(input: PipelineInput): Promise<PipelineResu
       scored.push(scoreJob(job, input.resume_profile_json, input.preferences, summary));
     }
 
-    const ranked = rankJobs(scored).slice(0, maxResults);
+    let scoredJobs = rankJobs(scored);
+
+    // ShipMachine augmentation: semantic re-ranking, gap analysis, ghost deep check
+    if (process.env.SHIPMACHINE_ENDPOINT || process.env.PROMPTOS_ENDPOINT) {
+      scoredJobs = await augmentJobs(scoredJobs, input.resume_profile_json, input.preferences) as ScoredJob[];
+    }
+
+    const ranked = scoredJobs.slice(0, maxResults);
 
     await saveJobSources(jobSources);
     await saveJobs(runId, input.candidate_id, ranked);

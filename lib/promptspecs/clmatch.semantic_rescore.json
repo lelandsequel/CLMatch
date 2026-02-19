@@ -1,0 +1,26 @@
+{
+  "id": "clmatch.semantic_rescore",
+  "version": "1.0.0",
+  "description": "Re-ranks top keyword-scored jobs by true semantic fit against full resume text",
+  "role": "agent",
+  "template": "You are an expert job-resume matching engine.\n\nRESUME PROFILE:\n{{resume_text}}\n\nTARGET TITLES: {{preferred_titles}}\n\nCANDIDATE JOBS (already keyword-scored, needs semantic re-ranking):\n{{jobs_json}}\n\nFor each job, assign a semantic_fit_score (0-100) based on genuine alignment between the resume and job description — go beyond keyword overlap. Consider:\n- Actual responsibilities match (not just title)\n- Required vs candidate experience level\n- Domain/industry fit\n- Likelihood of interview given this specific resume\n\nReturn a JSON array sorted by semantic_fit_score descending:\n[{\"job_id\": \"...\", \"semantic_fit_score\": 85, \"semantic_reasons\": [\"...\"], \"combined_score\": 87}]\n\nCombined score = 0.4 * keyword_score + 0.6 * semantic_fit_score",
+  "input_schema": {
+    "resume_text": "string",
+    "preferred_titles": "string[]",
+    "jobs_json": "string"
+  },
+  "output_schema": {
+    "type": "array",
+    "items": {
+      "job_id": "string",
+      "semantic_fit_score": "number",
+      "semantic_reasons": "string[]",
+      "combined_score": "number"
+    }
+  },
+  "policy": {
+    "allowed_roles": ["agent", "human"],
+    "requires_approval": false,
+    "max_tokens": 4000
+  }
+}

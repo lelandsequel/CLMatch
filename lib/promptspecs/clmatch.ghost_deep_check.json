@@ -1,0 +1,29 @@
+{
+  "id": "clmatch.ghost_deep_check",
+  "version": "1.0.0",
+  "description": "LLM-powered ghost job detection using company signals + JD language analysis",
+  "role": "agent",
+  "template": "You are a job market intelligence analyst specializing in detecting ghost jobs and hiring freeze patterns.\n\nCOMPANY: {{company_name}}\nJOB TITLE: {{job_title}}\nJOB DESCRIPTION:\n{{job_description}}\nPOSTED DATE: {{posted_at}}\nATS TYPE: {{ats_type}}\n\nAnalyze for ghost job signals. Look for:\n- Evergreen/template language (generic responsibilities, no team context)\n- Layoff or freeze indicators in company name recognition\n- Overly broad requirements (5+ years in 10 different domains)\n- No specific deliverables or team mentions\n- Unrealistic salary/requirement combinations\n- Description copied verbatim from similar postings\n\nReturn JSON:\n{\n  \"ghost_likelihood\": 0-100,\n  \"signals_found\": [\"specific signal 1\", \"signal 2\"],\n  \"signals_clear\": [\"positive signal 1\"],\n  \"recommendation\": \"Apply direct|Apply via referral|Skip|Verify first\",\n  \"reasoning\": \"one sentence\"\n}",
+  "input_schema": {
+    "company_name": "string",
+    "job_title": "string",
+    "job_description": "string",
+    "posted_at": "string",
+    "ats_type": "string"
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "ghost_likelihood": "number",
+      "signals_found": "string[]",
+      "signals_clear": "string[]",
+      "recommendation": "string",
+      "reasoning": "string"
+    }
+  },
+  "policy": {
+    "allowed_roles": ["agent", "human"],
+    "requires_approval": false,
+    "max_tokens": 1000
+  }
+}
